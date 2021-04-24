@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 21, 2021 at 06:51 PM
+-- Generation Time: Apr 24, 2021 at 06:07 AM
 -- Server version: 10.4.16-MariaDB
 -- PHP Version: 7.4.12
 
@@ -20,6 +20,21 @@ SET time_zone = "+00:00";
 --
 -- Database: `voice_based_eprescription`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `appointments`
+--
+
+CREATE TABLE `appointments` (
+  `bid` int(11) NOT NULL,
+  `booking_date` date NOT NULL,
+  `start_time` time NOT NULL,
+  `end_time` time NOT NULL,
+  `slot_no` int(11) NOT NULL,
+  `pid` int(11) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -92,6 +107,13 @@ INSERT INTO `patient` (`pid`, `did`, `pname`, `dob`, `pemail`, `pphno`, `ppasswd
 --
 
 --
+-- Indexes for table `appointments`
+--
+ALTER TABLE `appointments`
+  ADD PRIMARY KEY (`bid`),
+  ADD KEY `pid` (`pid`);
+
+--
 -- Indexes for table `consultation`
 --
 ALTER TABLE `consultation`
@@ -116,6 +138,12 @@ ALTER TABLE `patient`
 --
 
 --
+-- AUTO_INCREMENT for table `appointments`
+--
+ALTER TABLE `appointments`
+  MODIFY `bid` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `consultation`
 --
 ALTER TABLE `consultation`
@@ -136,6 +164,12 @@ ALTER TABLE `patient`
 --
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `appointments`
+--
+ALTER TABLE `appointments`
+  ADD CONSTRAINT `appointments_ibfk_1` FOREIGN KEY (`pid`) REFERENCES `patient` (`pid`);
 
 --
 -- Constraints for table `consultation`
