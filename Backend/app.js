@@ -2,8 +2,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
-const booking = require("./booking/book-appointment");
-
+const booking = require("./patient/booking/book-appointment");
+const login = require("./patient/login-register/login");
+const register = require("./patient/login-register/register");
 const db = require("knex")({
   client: "mysql",
   connection: {
@@ -22,6 +23,18 @@ app.get("/", (req, res) => {
     res.send(JSON.stringify("Hello world"));
 });
 
+//<--- Login-register -->
+app.post("/login", (req, res) => {
+  login.handleLogin(req, res, db);
+});
+
+app.post("/register", (req, res) => {
+  register.handleRegister(req, res, db);
+});
+
+
+
+//<--- Booking -->
 app.get("/get-available-slots", (req, res) => {
   booking.getAvailableSlots(req, res, db);
 });
