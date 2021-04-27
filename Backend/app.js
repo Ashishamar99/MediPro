@@ -3,8 +3,11 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
 const booking = require("./patient/booking/book-appointment");
-const login = require("./patient/login-register/login");
-const register = require("./patient/login-register/register");
+const patientRegister = require("./patient/login-register/register");
+const patientLogin = require("./patient/login-register/login");
+const doctorRegister = require("./doctor/login-register/register");
+const doctorLogin = require("./doctor/login-register/login");
+
 const db = require("knex")({
   client: "mysql",
   connection: {
@@ -23,15 +26,24 @@ app.get("/", (req, res) => {
     res.send(JSON.stringify("Hello world"));
 });
 
-//<--- Login-register -->
-app.post("/login", (req, res) => {
-  login.handleLogin(req, res, db);
+//<---Patient Login-register -->
+app.post("/patient/register", (req, res) => {
+  patientRegister.handlePatientRegister(req, res, db);
 });
 
-app.post("/register", (req, res) => {
-  register.handleRegister(req, res, db);
+app.post("/patient/login", (req, res) => {
+  patientLogin.handlePatientLogin(req, res, db);
 });
 
+
+//<---Doctor Login-register -->
+app.post("/doctor/register", (req, res) => {
+  doctorRegister.handleDoctorRegister(req, res, db);
+});
+
+app.post("/doctor/login", (req, res) => {
+  doctorLogin.handleDoctorLogin(req, res, db);
+});
 
 
 //<--- Booking -->

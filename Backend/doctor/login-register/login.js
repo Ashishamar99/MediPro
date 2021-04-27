@@ -1,18 +1,17 @@
-const handlePatientLogin = (req, res, db) => {
+const handleDoctorLogin = (req, res, db) => {
   const { phno, password } = req.body;
-
   if (!phno || !password) {
     return res.status(400).json("incorrect form submission");
   }
-  db.select("pphno", "ppasswd")
-    .from("patient")
-    .where("pphno", "=", phno)
+  db.select("dphno", "dpasswd")
+    .from("doctor")
+    .where("dphno", "=", phno)
     .then((data) => {
-      if (password.toString() === data[0].ppasswd) {
+      if (password.toString() === data[0].dpasswd) {
         return db
           .select("*")
-          .from("patient")
-          .where("pphno", "=", phno)
+          .from("doctor")
+          .where("dphno", "=", phno)
           .then((user) => {
             res.json(user[0]);
           })
@@ -25,5 +24,5 @@ const handlePatientLogin = (req, res, db) => {
 };
 
 module.exports = {
-  handlePatientLogin: handlePatientLogin,
+  handleDoctorLogin: handleDoctorLogin,
 };

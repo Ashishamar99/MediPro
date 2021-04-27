@@ -1,4 +1,4 @@
-const handleRegister = (req, res, db) => {
+const handlePatientRegister = (req, res, db) => {
   const { name, phno, email, dob, password  } = req.body;
   const did = null;
   db
@@ -26,5 +26,5 @@ const handleRegister = (req, res, db) => {
 };
 
 module.exports = {
-  handleRegister: handleRegister,
+  handlePatientRegister: handlePatientRegister,
 };
