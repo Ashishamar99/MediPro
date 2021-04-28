@@ -1,6 +1,5 @@
 const handlePatientRegister = (req, res, db) => {
   const { name, phno, email, dob, password  } = req.body;
-  const did = null;
   db
     .transaction(function (trx) {
       const patient = {
@@ -9,7 +8,6 @@ const handlePatientRegister = (req, res, db) => {
         pemail: email,
         pphno: phno,
         dob: dob,
-        did: did,
       };
 
       return trx
