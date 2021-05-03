@@ -1,19 +1,16 @@
 const handlePatientRegister = (req, res, db) => {
-  const { name, phno, email, dob, password  } = req.body;
-  db
-    .transaction(function (trx) {
-      const patient = {
-        pname: name,
-        ppasswd: password,
-        pemail: email,
-        pphno: phno,
-        dob: dob,
-      };
+  const { name, phno, email, dob, password } = req.body;
+  db.transaction(function (trx) {
+    const patient = {
+      pname: name,
+      ppasswd: password,
+      pemail: email,
+      pphno: phno,
+      dob: dob,
+    };
 
-      return trx
-        .insert(patient)
-        .into("patient")
-    })
+    return trx.insert(patient).into("patient");
+  })
     .then(function () {
       res.status(200).send("Registration successful!");
     })

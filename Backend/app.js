@@ -26,7 +26,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
-    res.send(JSON.stringify("Hello world"));
+  res.send(JSON.stringify("Hello world"));
 });
 
 //<--- Patient --->
@@ -46,7 +46,6 @@ app.post("/patient/login", (req, res) => {
   patientLogin.handlePatientLogin(req, res, db);
 });
 
-
 //<--- Doctor --->
 app.get("/doctor", (req, res) => {
   doctor.getDoctorsList(req, res, db);
@@ -64,7 +63,6 @@ app.post("/doctor/login", (req, res) => {
   doctorLogin.handleDoctorLogin(req, res, db);
 });
 
-
 //<--- Booking -->
 app.get("/get-slots", (req, res) => {
   booking.getSlots(req, res, db);
@@ -77,7 +75,6 @@ app.get("/get-available-slots", (req, res) => {
 app.post("/book-slot", (req, res) => {
   booking.bookSlot(req, res, db);
 });
-
 
 //<--- Consultation -->
 app.get("/consultation", (req, res) => {
@@ -96,8 +93,6 @@ app.get("/appointment", (req, res) => {
 app.get("/appointment/:id", (req, res) => {
   appointment.getAppointmentWithID(req, res, db);
 });
-
-
 
 //<--- Main -->
 app.listen(3000, () => {

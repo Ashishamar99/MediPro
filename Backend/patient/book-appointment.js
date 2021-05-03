@@ -11,7 +11,7 @@ const getSlots = (req, res, db) => {
 };
 
 const getAvailableSlots = (req, res, db) => {
-  //returns all available slots for booking (i.e., isBooked = 0) 
+  //returns all available slots for booking (i.e., isBooked = 0)
   db.select()
     .from("slots")
     .then((slotArr) => {
@@ -40,7 +40,7 @@ const bookSlot = (req, res, db) => {
       //insert slot details into appointment table
       db("appointments")
         .insert({
-          booking_date: dateTime().format("YYYY-MM-DD"), //assuming booking only for current day   
+          booking_date: dateTime().format("YYYY-MM-DD"), //assuming booking only for current day
           start_time: startTime,
           end_time: endTime,
           slot_no: slotNo,
@@ -59,7 +59,6 @@ const bookSlot = (req, res, db) => {
     .catch((err) => {
       res.send(err);
     });
-
 };
 
 module.exports = {

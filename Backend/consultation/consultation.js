@@ -5,13 +5,12 @@ const getConsultationList = (req, res, db) => {
       res.status(200).send(consultations);
     })
     .catch((err) => {
-        res.send("Unable to get consultation details")
-        console.error(err);
+      res.send("Unable to get consultation details");
+      console.error(err);
     });
 };
 
 const getConsultationWithID = (req, res, db) => {
-    
   const cid = req.params.id;
   db.select("*")
     .from("consultation")
