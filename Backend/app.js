@@ -66,6 +66,10 @@ app.post("/doctor/login", (req, res) => {
 
 
 //<--- Booking -->
+app.get("/get-slots", (req, res) => {
+  booking.getSlots(req, res, db);
+});
+
 app.get("/get-available-slots", (req, res) => {
   booking.getAvailableSlots(req, res, db);
 });

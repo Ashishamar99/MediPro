@@ -1,4 +1,15 @@
 const dateTime = require("moment");
+
+const getSlots = (req, res, db) => {
+  //returns all slots (including booked slots)
+  db.select()
+    .from("slots")
+    .then((slotArr) => {
+      res.status(200).send(slotArr);
+    })
+    .catch((err) => res.status(400).send(err));
+};
+
 const getAvailableSlots = (req, res, db) => {
   //returns all available slots for booking (i.e., isBooked = 0) 
   db.select()
@@ -52,6 +63,7 @@ const bookSlot = (req, res, db) => {
 };
 
 module.exports = {
+  getSlots: getSlots,
   getAvailableSlots: getAvailableSlots,
   bookSlot: bookSlot,
 };
