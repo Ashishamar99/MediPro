@@ -13,13 +13,28 @@ const doctorRegister = require("./doctor/register");
 const doctorLogin = require("./doctor/login");
 
 let port = process.env.PORT || 3000;
+
+const productionServer = {
+  host: "voice-based-eprescription.c6evra5ifcck.us-east-2.rds.amazonaws.com",
+  user: "admin",
+  password: "abhi1234",
+  database: "voice-based-eprescription",
+};
+
+const localServer = {
+  host: "127.0.0.1",
+  user: "root",
+  password: "",
+  database: "voice_based_eprescription",
+};
+
 const db = require("knex")({
   client: "mysql",
   connection: {
-    host: "voice-based-eprescription.c6evra5ifcck.us-east-2.rds.amazonaws.com",
-    user: "admin",
-    password: "abhi1234",
-    database: "voice-based-eprescription",
+    host: productionServer.host,
+    user: productionServer.user,
+    password: productionServer.password,
+    database: productionServer.database,
   },
 });
 
