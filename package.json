@@ -7,5 +7,23 @@
     "moment": "^2.29.1",
     "mysql": "^2.18.1",
     "nodemon": "^2.0.7"
-  }
+  },
+  "name": "medipro",
+  "description": "This is a web app which can be used by doctors to automatically generate prescriptions by voice and send them as an SMS or a PDF. This can also be used by patients to store their previous prescriptions.",
+  "version": "1.0.0",
+  "main": "app.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Ashishamar99/MediPro.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Ashishamar99/MediPro/issues"
+  },
+  "homepage": "https://github.com/Ashishamar99/MediPro#readme"
 }
