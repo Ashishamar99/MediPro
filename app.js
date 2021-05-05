@@ -31,10 +31,10 @@ const localServer = {
 const db = require("knex")({
   client: "mysql",
   connection: {
-    host: productionServer.host,
-    user: productionServer.user,
-    password: productionServer.password,
-    database: productionServer.database,
+    host: localServer.host,
+    user: localServer.user,
+    password: localServer.password,
+    database: localServer.database,
   },
 });
 
