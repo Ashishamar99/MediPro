@@ -12,6 +12,7 @@ const patientLogin = require("./patient/login");
 const doctorRegister = require("./doctor/register");
 const doctorLogin = require("./doctor/login");
 
+let port = process.env.PORT || 3000;
 const db = require("knex")({
   client: "mysql",
   connection: {
@@ -95,6 +96,6 @@ app.get("/appointment/:id", (req, res) => {
 });
 
 //<--- Main -->
-app.listen(3000, () => {
-  console.log("app is running on port 3000");
+app.listen(port, () => {
+  console.log(`app is running on port ${port}`);
 });
