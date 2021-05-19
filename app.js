@@ -88,6 +88,9 @@ app.post("/book-slot", (req, res) => {
   booking.bookSlot(req, res, db);
 });
 
+app.post("/unblock-slots", (req, res) => {
+  booking.unblockAllSlots(req, res, db);
+});
 //<--- Consultation -->
 app.get("/consultation", (req, res) => {
   consultation.getConsultationList(req, res, db);
@@ -110,6 +113,10 @@ app.get("/appointment", (req, res) => {
 
 app.get("/appointment/:id", (req, res) => {
   appointment.getAppointmentWithID(req, res, db);
+});
+
+app.get("/appointment/patient/:id", (req, res) => {
+  appointment.getAppointmentWithPID(req, res, db);
 });
 
 //<--- Main -->

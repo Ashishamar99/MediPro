@@ -28,36 +28,62 @@ const getAvailableSlots = (req, res, db) => {
 
 const bookSlot = (req, res, db) => {
   //get slot details for given slot number
-  const slotNo = req.body.slotNo;
-  const pid = req.body.pid;
-  db("slots")
-    .where("slot_no", slotNo)
-    .then((slotArr) => {
-      let slotDetails = slotArr[0];
-      let startTime = slotDetails.slot_start;
-      let endTime = slotDetails.slot_end;
+  const { slotNo, pid, did } = req.body;
 
-      //insert slot details into appointment table
-      db("appointments")
-        .insert({
-          booking_date: dateTime().format("YYYY-MM-DD"), //assuming booking only for current day
-          start_time: startTime,
-          end_time: endTime,
-          slot_no: slotNo,
-          pid: pid,
-        })
-        //update available slots
-        .then(
-          db("slots")
-            .where("slot_no", "=", slotNo)
-            .update({ isBooked: 1 })
-            .then((resp) => {
-              res.send(JSON.stringify(resp));
-            })
-        );
+  db("slots")
+    .where({ slot_no: slotNo, isBooked: 0 })
+    .then((slotArr) => {
+      if (!slotArr.length) {
+        res.status(400).send("Slot unavailable");
+      } else {
+        let slotDetails = slotArr[0];
+        let startTime = slotDetails.slot_start;
+        let endTime = slotDetails.slot_end;
+
+        //insert slot details into appointment table
+        db("appointments")
+          .insert({
+            booking_date: dateTime().format("YYYY-MM-DD"), //assuming booking only for current day
+            start_time: startTime,
+            end_time: endTime,
+            slot_no: slotNo,
+            pid: pid,
+            did: did,
+          })
+          //update available slots
+          .then(
+            db("slots")
+              .where("slot_no", "=", slotNo)
+              .update({ isBooked: 1 })
+              .then(() => {
+                res.status(200).send("Booking successful");
+              })
+          );
+      }
     })
     .catch((err) => {
       res.send(err);
+    });
+};
+
+const unblockAllSlots = (req, res, db) => {
+  const { did } = req.body;
+  db("doctor")
+    .select("did")
+    .where("did", did)
+    .then((doc) => {
+      if (!doc.length) {
+        res.status(400).send("Action unauthorized");
+      }
+    });
+  db("slots")
+    .update({ isBooked: 0 })
+    .then(() => {
+      res.status(200).send("Unblock successful");
+    })
+    .catch((err) => {
+      res.status(500).send("Couldn't unblock slots");
+      console.error(err);
     });
 };
 
@@ -65,4 +91,5 @@ module.exports = {
   getSlots: getSlots,
   getAvailableSlots: getAvailableSlots,
   bookSlot: bookSlot,
+  unblockAllSlots: unblockAllSlots,
 };
