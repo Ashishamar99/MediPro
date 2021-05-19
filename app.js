@@ -2,17 +2,13 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const app = express();
-const patient = require("./patient/patient");
-const doctor = require("./doctor/doctor");
-const consultation = require("./consultation/consultation");
-const appointment = require("./consultation/appointment");
-const booking = require("./patient/book-appointment");
-const patientRegister = require("./patient/register");
-const patientLogin = require("./patient/login");
-const doctorRegister = require("./doctor/register");
-const doctorLogin = require("./doctor/login");
+const patient = require("./src/patient");
+const doctor = require("./src/doctor");
+const consultation = require("./src/consultation/consultation");
+const appointment = require("./src/consultation/appointment");
+const booking = require("./src/consultation/book-appointment");
 
-let port = process.env.PORT || 3000;
+const port = process.env.PORT || 3000;
 
 const productionServer = {
   host: "voice-based-eprescription.c6evra5ifcck.us-east-2.rds.amazonaws.com",
@@ -55,11 +51,11 @@ app.get("/patient/:id", (req, res) => {
 });
 
 app.post("/patient/register", (req, res) => {
-  patientRegister.handlePatientRegister(req, res, db);
+  patient.handlePatientRegister(req, res, db);
 });
 
 app.post("/patient/login", (req, res) => {
-  patientLogin.handlePatientLogin(req, res, db);
+  patient.handlePatientLogin(req, res, db);
 });
 
 //<--- Doctor --->
@@ -72,11 +68,11 @@ app.get("/doctor/:id", (req, res) => {
 });
 
 app.post("/doctor/register", (req, res) => {
-  doctorRegister.handleDoctorRegister(req, res, db);
+  doctor.handleDoctorRegister(req, res, db);
 });
 
 app.post("/doctor/login", (req, res) => {
-  doctorLogin.handleDoctorLogin(req, res, db);
+  doctor.handleDoctorLogin(req, res, db);
 });
 
 //<--- Booking -->
@@ -99,6 +95,12 @@ app.get("/consultation", (req, res) => {
 
 app.get("/consultation/:id", (req, res) => {
   consultation.getConsultationWithID(req, res, db);
+});
+app.get("/consultation/patient/:id", (req, res) => {
+  consultation.getPatientConsultation(req, res, db);
+});
+app.get("/consultation/doctor/:id", (req, res) => {
+  consultation.getDoctorConsultation(req, res, db);
 });
 
 //<--- Appointment -->
