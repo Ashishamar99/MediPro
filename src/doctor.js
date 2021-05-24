@@ -41,12 +41,18 @@ const handleDoctorLogin = (req, res, db) => {
           .then((user) => {
             res.json(user[0]);
           })
-          .catch((err) => res.status(400).json("unable to get user"));
+          .catch((err) => {
+            console.error(err);
+            res.status(400).json("unable to get user");
+          });
       } else {
         res.status(400).json("wrong credentials");
       }
     })
-    .catch((err) => res.status(400).json(err));
+    .catch((err) => {
+      console.error(err);
+      res.status(400).json(err);
+    });
 };
 
 const handleDoctorRegister = (req, res, db) => {
@@ -57,7 +63,7 @@ const handleDoctorRegister = (req, res, db) => {
       dpasswd: password,
       demail: email,
       dphno: phno,
-      role: role,
+      role: role.toLowerCase(),
     };
 
     return trx
@@ -78,9 +84,24 @@ const handleDoctorRegister = (req, res, db) => {
   });
 };
 
+const getDoctorWithRole = (req, res, db) => {
+  const role = req.body.role;
+  db.select("did", "dname")
+    .from("doctor")
+    .where({ role: role, isAvailable: "1" })
+    .then((doctor) => {
+      res.status(200).send(doctor[0]); //return only one doctor
+    })
+    .catch((err) => {
+      res.status(400).send("Unable to get user");
+      console.error(err);
+    });
+};
+
 module.exports = {
   getDoctorWithID: getDoctorWithID,
   getDoctorsList: getDoctorsList,
   handleDoctorLogin: handleDoctorLogin,
   handleDoctorRegister: handleDoctorRegister,
+  getDoctorWithRole: getDoctorWithRole,
 };

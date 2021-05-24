@@ -67,6 +67,10 @@ app.get("/doctor/:id", (req, res) => {
   doctor.getDoctorWithID(req, res, db);
 });
 
+app.post("/get-doctor-with-role", (req, res) => {
+  doctor.getDoctorWithRole(req, res, db);
+});
+
 app.post("/doctor/register", (req, res) => {
   doctor.handleDoctorRegister(req, res, db);
 });
