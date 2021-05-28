@@ -34,7 +34,7 @@ const db = require("knex")({
   },
 });
 
-app.use(cors());
+app.use(cors({ origin: "*" }));
 app.use(bodyParser.json());
 
 app.get("/", (req, res) => {
@@ -65,6 +65,10 @@ app.get("/doctor", (req, res) => {
 
 app.get("/doctor/:id", (req, res) => {
   doctor.getDoctorWithID(req, res, db);
+});
+
+app.get("/get-available-doctors", (req, res) => {
+  doctor.getAvailableDoctors(req, res, db);
 });
 
 app.post("/get-doctor-with-role", (req, res) => {

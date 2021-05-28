@@ -86,11 +86,24 @@ const handleDoctorRegister = (req, res, db) => {
 
 const getDoctorWithRole = (req, res, db) => {
   const role = req.body.role;
-  db.select("did", "dname")
+  db.select("*")
     .from("doctor")
     .where({ role: role, isAvailable: "1" })
     .then((doctor) => {
       res.status(200).send(doctor[0]); //return only one doctor
+    })
+    .catch((err) => {
+      res.status(400).send("Unable to get user");
+      console.error(err);
+    });
+};
+
+const getAvailableDoctors = (req, res, db) => {
+  db.select("*")
+    .from("doctor")
+    .where({ isAvailable: "1" })
+    .then((doctor) => {
+      res.status(200).send(doctor);
     })
     .catch((err) => {
       res.status(400).send("Unable to get user");
@@ -104,4 +117,5 @@ module.exports = {
   handleDoctorLogin: handleDoctorLogin,
   handleDoctorRegister: handleDoctorRegister,
   getDoctorWithRole: getDoctorWithRole,
+  getAvailableDoctors: getAvailableDoctors,
 };

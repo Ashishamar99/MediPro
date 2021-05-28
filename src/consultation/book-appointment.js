@@ -29,7 +29,6 @@ const getAvailableSlots = (req, res, db) => {
 const bookSlot = (req, res, db) => {
   //get slot details for given slot number
   const { slotNo, pid, did } = req.body;
-
   db("slots")
     .where({ slot_no: slotNo, isBooked: 0 })
     .then((slotArr) => {
