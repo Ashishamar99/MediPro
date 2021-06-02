@@ -38,8 +38,23 @@ const getAppointmentWithPID = (req, res, db) => {
     });
 };
 
+const getAppointmentWithDID = (req, res, db) => {
+  const did = req.params.id;
+  db.select("*")
+    .from("appointments")
+    .where("did", "=", did)
+    .then((appointments) => {
+      res.status(200).send(appointments);
+    })
+    .catch((err) => {
+      res.send("Unable to get appointment details");
+      console.error(err);
+    });
+};
+
 module.exports = {
   getAppointmentList: getAppointmentList,
   getAppointmentWithID: getAppointmentWithID,
   getAppointmentWithPID: getAppointmentWithPID,
+  getAppointmentWithDID: getAppointmentWithDID,
 };

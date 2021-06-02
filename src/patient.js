@@ -1,5 +1,5 @@
 const handlePatientRegister = (req, res, db) => {
-  const { name, phno, email, dob, password } = req.body;
+  const { name, phno, gender, email, dob, password } = req.body;
   db.transaction(function (trx) {
     const patient = {
       pname: name,
@@ -7,14 +7,15 @@ const handlePatientRegister = (req, res, db) => {
       pemail: email,
       pphno: phno,
       dob: dob,
+      gender: gender,
     };
 
     return trx
       .insert(patient)
       .into("patient")
-      .then(() => {
+      .then((id) => {
         trx.commit;
-        res.status(200).send("Registration successful!");
+        res.status(200).send(id);
       })
       .catch((err) => {
         trx.rollback;
@@ -43,7 +44,7 @@ const handlePatientLogin = (req, res, db) => {
           .from("patient")
           .where("pphno", "=", phno)
           .then((user) => {
-            res.json(user[0]);
+            res.json(user[0].pid);
           })
           .catch((err) => res.status(400).json("unable to get user"));
       } else {

@@ -33,7 +33,7 @@ const handleDoctorLogin = (req, res, db) => {
     .from("doctor")
     .where("dphno", "=", phno)
     .then((data) => {
-      if (password.toString() === data[0].dpasswd) {
+      if (data.length && password.toString() === data[0].dpasswd) {
         return db
           .select("*")
           .from("doctor")
@@ -69,9 +69,9 @@ const handleDoctorRegister = (req, res, db) => {
     return trx
       .insert(doctor)
       .into("doctor")
-      .then(() => {
+      .then((id) => {
         trx.commit;
-        res.status(200).send("Registration successful!");
+        res.status(200).send(id);
       })
       .catch((err) => {
         trx.rollback;
