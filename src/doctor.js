@@ -33,7 +33,7 @@ const handleDoctorLogin = (req, res, db) => {
     .from("doctor")
     .where("dphno", "=", phno)
     .then((data) => {
-      if (password.toString() === data[0].dpasswd) {
+      if (data.length && password.toString() === data[0].dpasswd) {
         return db
           .select("*")
           .from("doctor")
