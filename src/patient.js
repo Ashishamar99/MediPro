@@ -44,7 +44,7 @@ const handlePatientLogin = (req, res, db) => {
           .from("patient")
           .where("pphno", "=", phno)
           .then((user) => {
-            res.json(user[0].pid);
+            res.json(user[0]);
           })
           .catch((err) => res.status(400).json("unable to get user"));
       } else {

@@ -7,7 +7,7 @@ const doctor = require("./src/doctor");
 const consultation = require("./src/consultation/consultation");
 const appointment = require("./src/consultation/appointment");
 const booking = require("./src/consultation/book-appointment");
-
+const ivrHandler = require("./src/ivr");
 const port = process.env.PORT || 3000;
 
 const productionServer = {
@@ -130,6 +130,15 @@ app.get("/appointment/patient/:id", (req, res) => {
 
 app.get("/appointment/doctor/:id", (req, res) => {
   appointment.getAppointmentWithDID(req, res, db);
+});
+
+//<--- IVR -->
+app.post("/ivr-request", (req, res) => {
+  ivrHandler.handleIVRRequest(req, res, db);
+});
+
+app.post("/ivr/menu", (req, res) => {
+  ivrHandler.ivrMenu(req, res, db);
 });
 
 //<--- Main -->
