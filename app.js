@@ -8,6 +8,9 @@ const consultation = require("./src/consultation/consultation");
 const appointment = require("./src/consultation/appointment");
 const booking = require("./src/consultation/book-appointment");
 const ivrHandler = require("./src/ivr");
+const multer = require("multer");
+let storage = multer.memoryStorage();
+let upload = multer({ storage: storage });
 const port = process.env.PORT || 3000;
 
 const productionServer = {
@@ -35,7 +38,7 @@ const db = require("knex")({
 });
 
 app.use(cors({ origin: "*" }));
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: "50mb" }));
 
 app.get("/", (req, res) => {
   res.send(JSON.stringify("Hello world"));
@@ -75,7 +78,7 @@ app.post("/get-doctor-with-role", (req, res) => {
   doctor.getDoctorWithRole(req, res, db);
 });
 
-app.post("/doctor/register", (req, res) => {
+app.post("/doctor/register", upload.single("sign-image"), (req, res) => {
   doctor.handleDoctorRegister(req, res, db);
 });
 

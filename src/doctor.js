@@ -16,6 +16,9 @@ const getDoctorWithID = (req, res, db) => {
     .from("doctor")
     .where("did", "=", id)
     .then((doctor) => {
+      if (doctor[0].signature) {
+        doctor[0].signature = doctor[0].signature.toString();
+      }
       res.status(200).send(doctor);
     })
     .catch((err) => {
@@ -56,7 +59,7 @@ const handleDoctorLogin = (req, res, db) => {
 };
 
 const handleDoctorRegister = (req, res, db) => {
-  const { name, phno, email, password, role } = req.body;
+  const { name, phno, email, password, role, signature } = req.body;
   db.transaction(function (trx) {
     const doctor = {
       dname: name,
@@ -64,6 +67,7 @@ const handleDoctorRegister = (req, res, db) => {
       demail: email,
       dphno: phno,
       role: role.toLowerCase(),
+      signature: signature,
     };
 
     return trx
