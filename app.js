@@ -145,3 +145,57 @@ app.post("/ivr/menu", (req, res) => {
 app.listen(port, () => {
   console.log(`app is running on port ${port}`);
 });
+
+// const accountSid = 'ACbe11bf5856751706836158a633466d34';
+// const authToken = 'a0ee05fa5617e158dd302945f36e811c';
+// const client = require("twilio")(accountSid, authToken);
+
+// var numberReceived = 'sdf';
+// let fetchRecentCall = async() => {
+//   client.calls.list({limit: 1})
+//               .then(calls => calls.forEach(c => {
+//                 console.log(`Time = ${c.dateUpdated}, From = ${c.from}`);
+//                 numberReceived=c.from;
+//                                           })
+//                     );
+//                                 }
+
+// fetchRecentCall.then(console.log(numberReceived));
+
+
+
+/*
+Call obj
+
+{
+  sid: 'CAffb7a2485e304b7f050211e200d5f64c',        
+  dateCreated: 2021-06-20T07:26:31.000Z,
+  dateUpdated: 2021-06-20T07:26:52.000Z,
+  parentCallSid: null,
+  accountSid: 'ACbe11bf5856751706836158a633466d34', 
+  to: '+19524666893',
+  toFormatted: '(952) 466-6893',
+  from: '+916361599901',
+  fromFormatted: '+916361599901',
+  phoneNumberSid: 'PNb7acbb6caa2ae149ea2dfe76f8a5a2eb',
+  status: 'completed',
+  startTime: 2021-06-20T07:26:42.000Z,
+  endTime: 2021-06-20T07:26:52.000Z,
+  duration: '10',
+  price: '-0.00850',
+  priceUnit: 'USD',
+  direction: 'inbound',
+  answeredBy: null,
+  annotation: null,
+  apiVersion: '2010-04-01',
+  forwardedFrom: '+19524666893',
+  groupSid: null,
+  callerName: null,
+  queueTime: '0',
+  trunkSid: '',
+  uri: '/2010-04-01/Accounts/ACbe11bf5856751706836158a633466d34/Calls/CAffb7a2485e304b7f050211e200d5f64c.json',
+  subresourceUris: {
+    notifications: '/2010-04-01/Accounts/ACbe11bf5856751706836158a633466d34/Calls/CAffb7a2485e304b7f050211e200d5f64c/Notifications.json',
+    recordings: '/2010-04-01/Accounts/ACbe11bf5856751706836158a633466d34/Calls/CAffb7a2485e304b7f050211e200d5f64c/Recordings.json'
+  }
+*/

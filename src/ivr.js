@@ -1,5 +1,8 @@
 const VoiceResponse = require("twilio").twiml.VoiceResponse;
 const querystring = require("querystring");
+const accountSid = 'ACbe11bf5856751706836158a633466d34';
+const authToken = 'a0ee05fa5617e158dd302945f36e811c';
+const client = require("twilio")(accountSid, authToken);
 
 const greetUser = (digit, res, db) => {
   const twiml = new VoiceResponse();
@@ -18,9 +21,28 @@ const greetUser = (digit, res, db) => {
       .into("patient")
       .then((pid) => {
         id = String(pid);
+
         var msg = `Registration successful, You're P I D is ${id}. To book an appointment press 1`;
         twiml.say(msg);
         twiml.hangup();
+
+        //Initialize Auth credentials
+
+        const accountSid = 'ACbe11bf5856751706836158a633466d34';
+        const authToken = 'a0ee05fa5617e158dd302945f36e811c';
+        const client = require("twilio")(accountSid, authToken);
+
+        client.calls.list({limit: 1})
+                    .then(calls => calls.forEach(c => {
+                      console.log(`Time = ${c.dateUpdated}, From = ${c.from}`)
+
+                      //Send SMS.
+                      var SMSmsg = `Registration successful, You're P I D is ${id}.`
+                      client.messages
+                            .create({body: SMSmsg, from: c.to, to: c.from})
+                            .then(message => console.log(message.sid));
+                    }));
+
         res.send(twiml.toString());
       });
 
