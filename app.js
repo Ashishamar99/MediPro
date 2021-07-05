@@ -117,6 +117,9 @@ app.get("/consultation/patient/:id", (req, res) => {
 app.get("/consultation/doctor/:id", (req, res) => {
   consultation.getDoctorConsultation(req, res, db);
 });
+app.post("/consultation", (req, res) => {
+  consultation.addConsultationInfo(req, res, db);
+});
 
 //<--- Appointment -->
 app.get("/appointment", (req, res) => {
