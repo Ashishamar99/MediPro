@@ -30,6 +30,12 @@ const getPatientConsultation = (req, res, db) => {
     .from("consultations")
     .where("pid", "=", pid)
     .then((consultations) => {
+      consultations.map((consultation) => {
+        if (consultation && consultation.pdf) {
+          consultation.pdf = consultation.pdf.toString();
+        }
+      });
+
       res.status(200).send(consultations);
     })
     .catch((err) => {
