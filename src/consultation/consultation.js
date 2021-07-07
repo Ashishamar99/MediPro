@@ -35,7 +35,6 @@ const getPatientConsultation = (req, res, db) => {
           consultation.pdf = consultation.pdf.toString();
         }
       });
-
       res.status(200).send(consultations);
     })
     .catch((err) => {
@@ -50,6 +49,11 @@ const getDoctorConsultation = (req, res, db) => {
     .from("consultations")
     .where("did", "=", did)
     .then((consultations) => {
+      consultations.map((consultation) => {
+        if (consultation && consultation.pdf) {
+          consultation.pdf = consultation.pdf.toString();
+        }
+      });
       res.status(200).send(consultations);
     })
     .catch((err) => {
