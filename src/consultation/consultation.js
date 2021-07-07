@@ -62,8 +62,8 @@ const addConsultationInfo = (req, res, db) => {
   const speechData = req.body.audio;
   let formattedSpeechData = "";
   formattedSpeechData += `Diagnosing for, ${speechData.diagnosis}.`;
-  let medicine = speechData.medicineData.join(".");
-  formattedSpeechData += ` Medicines prescribed, ${medicine}.`;
+  let medicine = speechData.medicineData.join("\n");
+  formattedSpeechData += ` Medicines prescribed, ${medicine}\n`;
   formattedSpeechData += speechData.advice.length
     ? `Advice, ${speechData.advice}`
     : "";

@@ -10,6 +10,38 @@ const getAppointmentList = (req, res, db) => {
     });
 };
 
+const cancelAppointment = (req, res, db) => {
+  const { bid, slotNo, did } = req.body;
+  db("appointments")
+    .where("bid", bid)
+    .del()
+    .then(() => {
+      db("slots")
+        .where({ slot_no: slotNo })
+        .update({ isBooked: 0 })
+        .then(() => {
+          db("doctor")
+            .where({ did: did })
+            .update({ isAvailable: 1 })
+            .then(() => {
+              res.status(200).send("Appointment cancelled!");
+            })
+            .catch((err) => {
+              res.status(400).send("Couldn't cancel appointment");
+              console.error(err);
+            });
+        })
+        .catch((err) => {
+          res.status(400).send("Couldn't cancel appointment");
+          console.error(err);
+        });
+    })
+    .catch((err) => {
+      res.send("Internal server error");
+      console.error(err);
+    });
+};
+
 const getAppointmentWithID = (req, res, db) => {
   const bid = req.params.id;
   db.select("*")
@@ -57,4 +89,5 @@ module.exports = {
   getAppointmentWithID: getAppointmentWithID,
   getAppointmentWithPID: getAppointmentWithPID,
   getAppointmentWithDID: getAppointmentWithDID,
+  cancelAppointment: cancelAppointment,
 };
