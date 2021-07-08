@@ -138,6 +138,10 @@ app.get("/appointment/doctor/:id", (req, res) => {
   appointment.getAppointmentWithDID(req, res, db);
 });
 
+app.post("/appointment/cancel", (req, res) => {
+  appointment.cancelAppointment(req, res, db);
+});
+
 //<--- IVR -->
 app.post("/ivr-request", (req, res) => {
   ivrHandler.handleIVRRequest(req, res, db);
