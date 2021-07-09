@@ -28,6 +28,27 @@ const handlePatientRegister = (req, res, db) => {
   });
 };
 
+const updatePatientRegister = (req, res, db) => {
+  const { pname, pid, pphno, gender, dob } = req.body;
+  const patient = {
+    pname: pname,
+    pphno: pphno,
+    dob: dob,
+    gender: gender,
+  };
+  db("patient")
+    .where("pid", pid)
+    .update(patient)
+    .then(() => {
+      res.status(200).send("Update successful!");
+    })
+    .catch((err) => {
+      //trx.rollback;
+      res.status(400).send("User doesn't exist");
+      console.error(err);
+    });
+};
+
 const handlePatientLogin = (req, res, db) => {
   const { phno, password } = req.body;
 
@@ -85,4 +106,5 @@ module.exports = {
   handlePatientLogin: handlePatientLogin,
   getPatientsList: getPatientsList,
   getPatientWithID: getPatientWithID,
+  updatePatientRegister: updatePatientRegister,
 };

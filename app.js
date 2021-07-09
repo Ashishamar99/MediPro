@@ -57,6 +57,10 @@ app.post("/patient/register", (req, res) => {
   patient.handlePatientRegister(req, res, db);
 });
 
+app.put("/patient/register", (req, res) => {
+  patient.updatePatientRegister(req, res, db);
+});
+
 app.post("/patient/login", (req, res) => {
   patient.handlePatientLogin(req, res, db);
 });
