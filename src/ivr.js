@@ -1,11 +1,78 @@
 const VoiceResponse = require("twilio").twiml.VoiceResponse;
 const querystring = require("querystring");
 
+//Abhi's Creds.
+// const accountSid = 'ACbe11bf5856751706836158a633466d34';
+// const authToken = 'a0ee05fa5617e158dd302945f36e811c';
+
+//Ashish Creds.
+const accountSid = 'AC215b45eb4eda26670a9e4f221311be6e';
+const authToken = '171e378a55f1952515effffd3bd040ee';
+const client = require("twilio")(accountSid, authToken);
+
+const sendSMS = (message) => {
+
+  client.calls.list({limit: 1})
+                    .then(calls => calls.forEach(c => {
+                      console.log(`Time = ${c.dateUpdated}, From = ${c.from}`)
+
+                      //Send SMS.
+                      var SMSmsg = message;
+                      client.messages
+                            .create({body: SMSmsg, from: c.to, to: c.from})
+                            .then(message => console.log(message.sid));
+                    }));
+  
+}
+
+const bookAppointment = (givenPID, res, db) => {
+  console.log(givenPID);
+  sendSMS(`Appointment details for ${givenPID} is : type of PID = ${typeof(givenPID)}`);
+
+  //make query for pid, if pid is there, get available slots for general doctor. get booking confirmation.
+  // voice - available slot is at :start time: to confirm press 1 to cancel press 2
+  // else something.
+}
+
+//pidMenu is like ivrMenu which passes PID input to bookAppointment.
+const pidMenu = (req, res, db) => {
+  var body = "";
+  req.on("data", (chunk) => {
+    body += chunk;
+  });
+  req.on("end", function () {
+    let enteredDigit = parseInt(querystring.parse(body).Digits);
+    console.log(enteredDigit);
+    bookAppointment(enteredDigit, res, db);
+  });
+  res.type("text/xml");
+};
+
+//getPID is like handleIVRRequest. which triggers pidMenu.
+const getPID = (res) => {
+  const phone = new VoiceResponse();
+  const gather = phone.gather({
+    action: "/ivr/pidmenu",
+    // timeout: 5,
+    method: "POST",
+  });
+
+  gather.say(
+    "Enter your P I D",
+    { loop: 2 }
+  );
+  res.type("text/xml");
+  res.send(phone.toString());
+};
+
 const greetUser = (digit, res, db) => {
   const twiml = new VoiceResponse();
   var id = "";
   if (digit === 1) {
-    twiml.say("You are an existing user"); //gather PID, if valid PID -> booking, listen pres
+    mymsg = 'You are an existing user';
+    twiml.say(mymsg); //gather PID, if valid PID -> booking, listen pres
+    getPID(res);
+
   } else if (digit === 2) {
     db.insert({
       pname: null,
@@ -18,9 +85,13 @@ const greetUser = (digit, res, db) => {
       .into("patient")
       .then((pid) => {
         id = String(pid);
-        var msg = `Registration successful, You're P I D is ${id}. To book an appointment press 1`;
+        var msg = `Registration successful, You're P I D is ${id}.`;
         twiml.say(msg);
         twiml.hangup();
+
+        smsMessage = `Registration successful, You're P I D is ${id}.`;
+        sendSMS(smsMessage);
+
         res.send(twiml.toString());
       });
 
@@ -63,4 +134,6 @@ const handleIVRRequest = (req, res, db) => {
 module.exports = {
   ivrMenu: ivrMenu,
   handleIVRRequest: handleIVRRequest,
+  pidMenu: pidMenu,
+  getPID: getPID,
 };
