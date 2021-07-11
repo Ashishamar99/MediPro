@@ -17,11 +17,9 @@ const bookingMenu = (req, res, db) => {
 const handleBookingMenu = (digit, pid, res, db) => {
   if (digit === 1) {
     //get slots`
-    console.log("Getting available slots...");
     handleBooking(pid, res, db);
   } else if (digit === 2) {
     //get recent consultation
-    console.log("Getting consultation details...");
   }
 };
 
@@ -75,7 +73,7 @@ const handleAppointment = (digit, pid, res, db) => {
                   .then((doc) => {
                     if (!slotArr.length || !doc.length) {
                       vr.say("Sorry, No slots available at this moment");
-                      res.send(vr.toString()); //new
+                      res.send(vr.toString());
                     } else {
                       let slotDetails = slotArr[0];
                       let startTime = slotDetails.slot_start;
@@ -104,7 +102,12 @@ const handleAppointment = (digit, pid, res, db) => {
                                   .update({ isAvailable: 0 })
                                   .then(() => {
                                     vr.say(
-                                      `Booking successful, appointment at ${startTime}, details of booking will be shared to this number.`
+                                      `Your Booking for ${bookingField} is successful, appointment at ${dateTime(
+                                        startTime,
+                                        "hh:mm a"
+                                      ).format(
+                                        "LT"
+                                      )}, details of booking will be shared to you through SMS.`
                                     );
                                     res.send(vr.toString());
                                   })
@@ -194,29 +197,66 @@ const handlePatientRegister = (res, db) => {
     });
 };
 
+const handleLoginMenu = (req, res, db) => {
+  let body = "";
+  req.on("data", (chunk) => {
+    body += chunk;
+  });
+  req.on("end", function () {
+    let id = parseInt(querystring.parse(body).Digits);
+    let twiml = new VoiceResponse();
+    const gather = twiml.gather({
+      action: `/ivr/booking-menu/${id}`,
+      numDigits: "1",
+      method: "POST",
+    });
+
+    db.select("pname")
+      .from("patient")
+      .where({ pid: id })
+      .then((data) => {
+        if (data && data.length) {
+          gather.say(
+            `Welcome ${data[0].pname}, To book an appointment press 1. To hear previous consultation details press 2.`,
+            { loop: 2 }
+          );
+
+          res.type("text/xml");
+          res.send(twiml.toString());
+        } else {
+          twiml.say(
+            `No user found for P I D ${id}. Please check the P I D and try again`
+          );
+          twiml.hangup();
+          res.type("text/xml");
+          res.send(twiml.toString());
+        }
+      });
+  });
+};
+
+const handlePatientLogin = (res, db) => {
+  let twiml = new VoiceResponse();
+
+  const gather = twiml.gather({
+    action: "/ivr/login",
+    timeout: 3,
+    method: "POST",
+  });
+
+  gather.say("Please enter your P I D.", { loop: 2 });
+
+  res.type("text/xml");
+  res.send(twiml.toString());
+};
+
 // <--------------------------------------------------->
 const greetUser = (digit, res, db) => {
   const twiml = new VoiceResponse();
   if (digit === 1) {
-    twiml.say("You are an existing user");
-    //handle login
+    handlePatientLogin(res, db, twiml);
   } else if (digit === 2) {
     handlePatientRegister(res, db, twiml);
-    // twiml.hangup();
-    // twiml.say("Registration successful!");
-
-    // const gather = twiml.gather({
-    //   action: "/ivr/booking-menu",
-    //   numDigits: "1",
-    //   method: "POST",
-    // });
-
-    // gather.say(
-    //   "To book an appointment press 1. To hear previous consultation details press 2.",
-    //   { loop: 2 }
-    // );
-    // res.type("text/xml");
-    // res.send(twiml.toString());
   }
 };
 
@@ -257,4 +297,5 @@ module.exports = {
   handleIVRRequest: handleIVRRequest,
   bookingMenu: bookingMenu,
   appointmentMenu: appointmentMenu,
+  handleLoginMenu: handleLoginMenu,
 };

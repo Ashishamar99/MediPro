@@ -151,6 +151,10 @@ app.post("/ivr-request", (req, res) => {
   ivrHandler.handleIVRRequest(req, res, db);
 });
 
+app.post("/ivr/login", (req, res) => {
+  ivrHandler.handleLoginMenu(req, res, db);
+});
+
 app.post("/ivr/menu", (req, res) => {
   ivrHandler.ivrMenu(req, res, db);
 });
