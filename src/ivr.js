@@ -19,6 +19,7 @@ const handleBookingMenu = (digit, pid, res, db) => {
     //get slots`
     handleBooking(pid, res, db);
   } else if (digit === 2) {
+    handleConsultation(pid, res, db);
     //get recent consultation
   }
 };
@@ -162,6 +163,28 @@ const handleBooking = (pid, res, db) => {
   res.send(voiceResponse.toString());
 };
 
+const handleConsultation = (pid, res, db) => {
+  const vr = new VoiceResponse();
+  db("consultations")
+    .where({ pid: pid })
+    .then((data) => {
+      if (data && data.length) {
+        vr.say(
+          `Playing your most recent consultation done on ${dateTime(
+            data[0].cdatetime
+          ).format("MMMM Do YYYY")}`
+        );
+        vr.say(data[0].audio);
+        vr.hangup();
+        res.send(vr.toString());
+      } else {
+        vr.say(`No consultation data found for P I D ${pid}`);
+        vr.hangup();
+        res.send(vr.toString());
+      }
+    });
+};
+
 const handlePatientRegister = (res, db) => {
   db.insert({
     pname: null,
@@ -184,10 +207,7 @@ const handlePatientRegister = (res, db) => {
         method: "POST",
       });
 
-      gather.say(
-        "To book an appointment press 1. To hear previous consultation details press 2.",
-        { loop: 2 }
-      );
+      gather.say("To book an appointment press 1", { loop: 2 });
 
       res.type("text/xml");
       res.send(twiml.toString());
@@ -240,7 +260,7 @@ const handlePatientLogin = (res, db) => {
 
   const gather = twiml.gather({
     action: "/ivr/login",
-    timeout: 3,
+    timeout: 2,
     method: "POST",
   });
 
