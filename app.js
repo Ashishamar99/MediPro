@@ -155,12 +155,23 @@ app.post("/ivr/menu", (req, res) => {
   ivrHandler.ivrMenu(req, res, db);
 });
 
-app.post("/ivr/pidmenu", (req, res) => {
-  ivrHandler.pidMenu(req, res, db);
+app.post("/ivr/booking-menu/:id", (req, res) => {
+  ivrHandler.bookingMenu(req, res, db);
 });
+
+app.post("/ivr/appointment/:id", (req, res) => {
+  ivrHandler.appointmentMenu(req, res, db);
+});
+
+// app.post("/ivr/pidmenu", (req, res) => {
+//   ivrHandler.pidMenu(req, res, db);
+// });
+
+// app.post("/ivr/booking", (req, res) => {
+//   ivrHandler.bookingMenu(req, res, db);
+// });
+
 //<--- Main -->
 app.listen(port, () => {
   console.log(`app is running on port ${port}`);
 });
-
-
