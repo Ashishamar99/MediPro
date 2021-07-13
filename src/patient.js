@@ -39,8 +39,11 @@ const updatePatientRegister = (req, res, db) => {
   db("patient")
     .where("pid", pid)
     .update(patient)
-    .then(() => {
-      res.status(200).send("Update successful!");
+    .then((isUpdated) => {
+      if (isUpdated === 1) {
+        res.status(200).send("Update successful!");
+      }
+      res.status(404).send("Incorrect PID");
     })
     .catch((err) => {
       //trx.rollback;
@@ -48,7 +51,6 @@ const updatePatientRegister = (req, res, db) => {
       console.error(err);
     });
 };
-
 
 const handlePatientLogin = (req, res, db) => {
   const { phno, password } = req.body;
@@ -107,6 +109,5 @@ module.exports = {
   handlePatientLogin: handlePatientLogin,
   getPatientsList: getPatientsList,
   getPatientWithID: getPatientWithID,
-  updatePatientRegister: updatePatientRegister
-
+  updatePatientRegister: updatePatientRegister,
 };

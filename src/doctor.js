@@ -16,7 +16,7 @@ const getDoctorWithID = (req, res, db) => {
     .from("doctor")
     .where("did", "=", id)
     .then((doctor) => {
-      if(doctor&&doctor[0].signature!==null) {
+      if (doctor && doctor[0].signature !== null) {
         doctor[0].signature = doctor[0].signature.toString();
       }
       res.status(200).send(doctor);
