@@ -2,6 +2,50 @@ const dateTime = require("moment");
 const VoiceResponse = require("twilio").twiml.VoiceResponse;
 const querystring = require("querystring");
 
+const getNumberCallSendSMS = (message) => {
+  var number = "";
+
+  // const authToken = "5e6e41368f4e95e751625ec58ce549c9";
+  // const accountSid = "AC215b45eb4eda26670a9e4f221311be6e";
+  const authToken = "1d9161a82dadc3eb577a9a40f13485a3";
+  const accountSid = "ACbe11bf5856751706836158a633466d34";
+
+  const client = require("twilio")(accountSid, authToken);
+
+  client.calls.list({ limit: 1 }).then((calls) =>
+    calls.forEach((c) => {
+      number = c.from.slice(3);
+      //send SMS now
+      sendSMS(message, number);
+    })
+  );
+};
+
+const sendSMS = (message, number) => {
+  var unirest = require("unirest");
+
+  var req = unirest("GET", "https://www.fast2sms.com/dev/bulkV2");
+
+  req.query({
+    authorization:
+      "B9Hy6Fvs3dJUo2cj175PeGOkKEA4TiVNLMWrq0XRhwZl8uCIQYOVePXyYrE6JMbj41iUHvR5owIWsh7x",
+    sender_id: "TXTIND",
+    message: message,
+    route: "v3",
+    numbers: number,
+  });
+
+  req.headers({
+    "cache-control": "no-cache",
+  });
+
+  req.end(function (res) {
+    if (res.error) throw new Error(res.error);
+
+    console.log(res.body);
+  });
+};
+
 const bookingMenu = (req, res, db) => {
   let body = "";
   req.on("data", (chunk) => {
@@ -45,13 +89,14 @@ const handleAppointment = (digit, pid, res, db) => {
     "Dental",
   ];
   let bookingField = fields[digit - 1];
-  console.log("bookingField: ", bookingField);
   let did = "";
   db.select("*")
     .from("doctor")
     .where({ isAvailable: "1", role: bookingField })
     .then((doctor) => {
       did = doctor[0].did;
+      dname = doctor[0].dname;
+      dphno = doctor[0].dphno;
       let vr = new VoiceResponse();
       let result = [];
       db.select()
@@ -109,6 +154,14 @@ const handleAppointment = (digit, pid, res, db) => {
                                       ).format(
                                         "LT"
                                       )}, details of booking will be shared to you through SMS.`
+                                    );
+                                    getNumberCallSendSMS(
+                                      `Your Booking for ${bookingField} is successful, appointment at ${dateTime(
+                                        startTime,
+                                        "hh:mm a"
+                                      ).format(
+                                        "LT"
+                                      )}. Contact doctor ${dname} \n Phno: ${dphno}`
                                     );
                                     res.send(vr.toString());
                                   })
@@ -200,6 +253,7 @@ const handlePatientRegister = (res, db) => {
       let msg = `Registration successful, You're P I D is ${id}.`;
       let twiml = new VoiceResponse();
       twiml.say(msg);
+      getNumberCallSendSMS(msg);
 
       const gather = twiml.gather({
         action: `/ivr/booking-menu/${id}`,
@@ -208,7 +262,6 @@ const handlePatientRegister = (res, db) => {
       });
 
       gather.say("To book an appointment press 1", { loop: 2 });
-
       res.type("text/xml");
       res.send(twiml.toString());
     })
