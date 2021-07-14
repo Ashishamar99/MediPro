@@ -2,6 +2,7 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "fast2sms": "^1.0.3",
     "install": "^0.13.0",
     "knex": "^0.95.4",
     "moment": "^2.29.1",
