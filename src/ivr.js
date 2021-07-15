@@ -4,7 +4,6 @@ const querystring = require("querystring");
 
 const getNumberCallSendSMS = (message) => {
   var number = "";
-
   // const authToken = "5e6e41368f4e95e751625ec58ce549c9";
   // const accountSid = "AC215b45eb4eda26670a9e4f221311be6e";
   const authToken = "1d9161a82dadc3eb577a9a40f13485a3";
@@ -22,10 +21,10 @@ const getNumberCallSendSMS = (message) => {
 };
 
 const sendSMS = (message, number) => {
+  console.log(message, number);
   var unirest = require("unirest");
 
   var req = unirest("GET", "https://www.fast2sms.com/dev/bulkV2");
-
   req.query({
     authorization:
       "B9Hy6Fvs3dJUo2cj175PeGOkKEA4TiVNLMWrq0XRhwZl8uCIQYOVePXyYrE6JMbj41iUHvR5owIWsh7x",
@@ -41,7 +40,6 @@ const sendSMS = (message, number) => {
 
   req.end(function (res) {
     if (res.error) throw new Error(res.error);
-
     console.log(res.body);
   });
 };
@@ -94,98 +92,103 @@ const handleAppointment = (digit, pid, res, db) => {
     .from("doctor")
     .where({ isAvailable: "1", role: bookingField })
     .then((doctor) => {
-      did = doctor[0].did;
-      dname = doctor[0].dname;
-      dphno = doctor[0].dphno;
       let vr = new VoiceResponse();
-      let result = [];
-      db.select()
-        .from("slots")
-        .then((slotArr) => {
-          slotArr.map((slot) => {
-            if (slot.isBooked == 0) {
-              result.push(slot);
+      if (!doctor.length) {
+        vr.say("No doctor available");
+        res.send(vr.toString());
+      } else {
+        did = doctor[0].did;
+        dname = doctor[0].dname;
+        dphno = doctor[0].dphno;
+        let result = [];
+        db.select()
+          .from("slots")
+          .then((slotArr) => {
+            slotArr.map((slot) => {
+              if (slot.isBooked == 0) {
+                result.push(slot);
+              }
+            });
+
+            if (result && result.length) {
+              let slot_no = result[0].slot_no;
+
+              db("slots")
+                .where({ slot_no: slot_no, isBooked: 0 })
+                .then((slotArr) => {
+                  db("doctor")
+                    .where({ isAvailable: 1 })
+                    .then((doc) => {
+                      if (!slotArr.length || !doc.length) {
+                        vr.say("Sorry, No slots available at this moment");
+                        res.send(vr.toString());
+                      } else {
+                        let slotDetails = slotArr[0];
+                        let startTime = slotDetails.slot_start;
+                        let endTime = slotDetails.slot_end;
+
+                        return (
+                          db("appointments")
+                            .insert({
+                              booking_date: dateTime().format("YYYY-MM-DD"),
+                              start_time: startTime,
+                              end_time: endTime,
+                              slot_no: slot_no,
+                              pid: pid,
+                              did: did,
+                            })
+
+                            //update available slots and doctor availability
+                            .then(() => {
+                              db("slots")
+                                .where({ slot_no: slot_no })
+                                .update({ isBooked: 1 })
+                                .then(() => {
+                                  console.log("Success");
+                                  db("doctor")
+                                    .where({ did: did })
+                                    .update({ isAvailable: 0 })
+                                    .then(() => {
+                                      vr.say(
+                                        `Your Booking for ${bookingField} is successful, appointment at ${dateTime(
+                                          startTime,
+                                          "hh:mm a"
+                                        ).format(
+                                          "LT"
+                                        )}, details of booking will be shared to you through SMS.`
+                                      );
+                                      getNumberCallSendSMS(
+                                        `Your Booking for ${bookingField} is successful, appointment at ${dateTime(
+                                          startTime,
+                                          "hh:mm a"
+                                        ).format(
+                                          "LT"
+                                        )}. Contact doctor ${dname} \n Phno: ${dphno}`
+                                      );
+                                      res.send(vr.toString());
+                                    })
+                                    .catch((err) => {
+                                      // vr.say("Couldn't book appointment");
+                                      console.error(err);
+                                    });
+                                })
+                                .catch((err) => {
+                                  console.error(err);
+                                });
+                            })
+                            .catch((err) => {
+                              console.error(err);
+                            })
+                        );
+                      }
+                    });
+                })
+                .catch(function (err) {
+                  console.error(err);
+                });
             }
           });
-
-          if (result && result.length) {
-            let slot_no = result[0].slot_no;
-
-            db("slots")
-              .where({ slot_no: slot_no, isBooked: 0 })
-              .then((slotArr) => {
-                db("doctor")
-                  .where({ isAvailable: 1 })
-                  .then((doc) => {
-                    if (!slotArr.length || !doc.length) {
-                      vr.say("Sorry, No slots available at this moment");
-                      res.send(vr.toString());
-                    } else {
-                      let slotDetails = slotArr[0];
-                      let startTime = slotDetails.slot_start;
-                      let endTime = slotDetails.slot_end;
-
-                      return (
-                        db("appointments")
-                          .insert({
-                            booking_date: dateTime().format("YYYY-MM-DD"),
-                            start_time: startTime,
-                            end_time: endTime,
-                            slot_no: slot_no,
-                            pid: pid,
-                            did: did,
-                          })
-
-                          //update available slots and doctor availability
-                          .then(() => {
-                            db("slots")
-                              .where({ slot_no: slot_no })
-                              .update({ isBooked: 1 })
-                              .then(() => {
-                                console.log("Success");
-                                db("doctor")
-                                  .where({ did: did })
-                                  .update({ isAvailable: 0 })
-                                  .then(() => {
-                                    vr.say(
-                                      `Your Booking for ${bookingField} is successful, appointment at ${dateTime(
-                                        startTime,
-                                        "hh:mm a"
-                                      ).format(
-                                        "LT"
-                                      )}, details of booking will be shared to you through SMS.`
-                                    );
-                                    getNumberCallSendSMS(
-                                      `Your Booking for ${bookingField} is successful, appointment at ${dateTime(
-                                        startTime,
-                                        "hh:mm a"
-                                      ).format(
-                                        "LT"
-                                      )}. Contact doctor ${dname} \n Phno: ${dphno}`
-                                    );
-                                    res.send(vr.toString());
-                                  })
-                                  .catch((err) => {
-                                    // vr.say("Couldn't book appointment");
-                                    console.error(err);
-                                  });
-                              })
-                              .catch((err) => {
-                                console.error(err);
-                              });
-                          })
-                          .catch((err) => {
-                            console.error(err);
-                          })
-                      );
-                    }
-                  });
-              })
-              .catch(function (err) {
-                console.error(err);
-              });
-          }
-        });
+      }
     })
     .catch((err) => {
       console.error(err);
@@ -374,4 +377,5 @@ module.exports = {
   bookingMenu: bookingMenu,
   appointmentMenu: appointmentMenu,
   handleLoginMenu: handleLoginMenu,
+  sendSMS: sendSMS,
 };
