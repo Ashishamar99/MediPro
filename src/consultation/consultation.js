@@ -1,3 +1,5 @@
+const smsFunction = require('../ivr').sendSMS;
+
 const getConsultationList = (req, res, db) => {
   db.select("*")
     .from("consultations")
@@ -79,6 +81,29 @@ const addConsultationInfo = (req, res, db) => {
       .into("consultations")
       .then((id) => {
         trx.commit;
+
+        db.select("pphno")
+          .from("patient")
+          .where("pid", "=", consultationInfo.pid)
+          .then((pphno) => {
+            console.log(pphno[0].pphno, consultationInfo.pid);
+            //SendSMS
+            var patientPhoneNumber = String(pphno[0].pphno);
+
+            //Removing +91 from phone number
+            if(patientPhoneNumber.startsWith("+91")){
+              patientPhoneNumber = patientPhoneNumber.slice(3);
+            }
+
+            var SMSmessage = "Your audio prescription is generated, please call IVR service to listen to it";
+            smsFunction(SMSmessage, patientPhoneNumber);
+
+          })
+          .catch((err) => {
+            res.status(400).send("Unable to get user");
+            console.error(err);
+          });
+
         res.status(200).send(id);
       })
       .catch((err) => {
