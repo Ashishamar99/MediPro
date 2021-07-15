@@ -304,6 +304,9 @@ const handleLoginMenu = (req, res, db) => {
           res.type("text/xml");
           res.send(twiml.toString());
         }
+      })
+      .catch((err) => {
+        console.error(err);
       });
   });
 };
