@@ -6,13 +6,14 @@ const getNumberCallSendSMS = (message) => {
   var number = "";
   // const authToken = "5e6e41368f4e95e751625ec58ce549c9";
   // const accountSid = "AC215b45eb4eda26670a9e4f221311be6e";
-  const authToken = "1d9161a82dadc3eb577a9a40f13485a3";
+  const authToken = "23c598fc8d69f7344406aa602aef02bc";
   const accountSid = "ACbe11bf5856751706836158a633466d34";
 
   const client = require("twilio")(accountSid, authToken);
 
   client.calls.list({ limit: 1 }).then((calls) =>
     calls.forEach((c) => {
+      console.log(c);
       number = c.from.slice(3);
       //send SMS now
       sendSMS(message, number);
@@ -94,7 +95,7 @@ const handleAppointment = (digit, pid, res, db) => {
     .then((doctor) => {
       let vr = new VoiceResponse();
       if (!doctor.length) {
-        vr.say("No doctor available");
+        vr.say("No doctor available", { voice: "Polly.Aditi" });
         res.send(vr.toString());
       } else {
         did = doctor[0].did;
@@ -120,7 +121,9 @@ const handleAppointment = (digit, pid, res, db) => {
                     .where({ isAvailable: 1 })
                     .then((doc) => {
                       if (!slotArr.length || !doc.length) {
-                        vr.say("Sorry, No slots available at this moment");
+                        vr.say("Sorry, No slots available at this moment", {
+                          voice: "Polly.Aditi",
+                        });
                         res.send(vr.toString());
                       } else {
                         let slotDetails = slotArr[0];
@@ -155,7 +158,8 @@ const handleAppointment = (digit, pid, res, db) => {
                                           "hh:mm a"
                                         ).format(
                                           "LT"
-                                        )}, details of booking will be shared to you through SMS.`
+                                        )}, details of booking will be shared to you through SMS.`,
+                                        { voice: "Polly.Aditi" }
                                       );
                                       getNumberCallSendSMS(
                                         `Your Booking for ${bookingField} is successful, appointment at ${dateTime(
@@ -214,7 +218,7 @@ const handleBooking = (pid, res, db) => {
   for (let i = 0; i < fields.length; i++) {
     msg += `To book an appointment for ${fields[i]} press ${i + 1} \n`;
   }
-  gather.say(msg, { loop: 2 });
+  gather.say(msg, { loop: 2, voice: "Polly.Aditi" });
   res.type("text/xml");
   res.send(voiceResponse.toString());
 };
@@ -228,13 +232,16 @@ const handleConsultation = (pid, res, db) => {
         vr.say(
           `Playing your most recent consultation done on ${dateTime(
             data[0].cdatetime
-          ).format("MMMM Do YYYY")}`
+          ).format("MMMM Do YYYY")}`,
+          { voice: "Polly.Aditi" }
         );
-        vr.say(data[0].audio);
+        vr.say(data[0].audio, { voice: "Polly.Aditi" });
         vr.hangup();
         res.send(vr.toString());
       } else {
-        vr.say(`No consultation data found for P I D ${pid}`);
+        vr.say(`No consultation data found for P I D ${pid}`, {
+          voice: "Polly.Aditi",
+        });
         vr.hangup();
         res.send(vr.toString());
       }
@@ -255,7 +262,7 @@ const handlePatientRegister = (res, db) => {
       let id = String(pid);
       let msg = `Registration successful, You're P I D is ${id}.`;
       let twiml = new VoiceResponse();
-      twiml.say(msg);
+      twiml.say(msg, { voice: "Polly.Aditi" });
       getNumberCallSendSMS(msg);
 
       const gather = twiml.gather({
@@ -264,7 +271,10 @@ const handlePatientRegister = (res, db) => {
         method: "POST",
       });
 
-      gather.say("To book an appointment press 1", { loop: 2 });
+      gather.say("To book an appointment press 1", {
+        loop: 2,
+        voice: "Polly.Aditi",
+      });
       res.type("text/xml");
       res.send(twiml.toString());
     })
@@ -294,14 +304,15 @@ const handleLoginMenu = (req, res, db) => {
         if (data && data.length) {
           gather.say(
             `Welcome ${data[0].pname}, To book an appointment press 1. To hear previous consultation details press 2.`,
-            { loop: 2 }
+            { loop: 2, voice: "Polly.Aditi" }
           );
 
           res.type("text/xml");
           res.send(twiml.toString());
         } else {
           twiml.say(
-            `No user found for P I D ${id}. Please check the P I D and try again`
+            `No user found for P I D ${id}. Please check the P I D and try again`,
+            { voice: "Polly.Aditi" }
           );
           twiml.hangup();
           res.type("text/xml");
@@ -323,7 +334,7 @@ const handlePatientLogin = (res, db) => {
     method: "POST",
   });
 
-  gather.say("Please enter your P I D.", { loop: 2 });
+  gather.say("Please enter your P I D.", { loop: 2, voice: "Polly.Aditi" });
 
   res.type("text/xml");
   res.send(twiml.toString());
@@ -354,7 +365,10 @@ const ivrMenu = (req, res, db) => {
 
 const handleIVRRequest = (req, res, db) => {
   const voiceResponse = new VoiceResponse();
-  voiceResponse.say({ loop: 1 }, "Welcome to voice based e-prescription");
+  voiceResponse.say(
+    { loop: 1, voice: "Polly.Aditi" },
+    "Welcome to voice based e-prescription"
+  );
   const gather = voiceResponse.gather({
     action: "/ivr/menu",
     numDigits: "1",
@@ -364,7 +378,7 @@ const handleIVRRequest = (req, res, db) => {
 
   gather.say(
     "Please press 1 if you're an existing user. Press 2 if you're a new user",
-    { loop: 2 }
+    { loop: 2, voice: "Polly.Aditi" }
   );
   res.type("text/xml");
   res.send(voiceResponse.toString());
