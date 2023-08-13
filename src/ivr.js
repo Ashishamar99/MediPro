@@ -4,10 +4,8 @@ const querystring = require("querystring");
 
 const getNumberCallSendSMS = (message) => {
   var number = "";
-  // const authToken = "5e6e41368f4e95e751625ec58ce549c9";
-  // const accountSid = "AC215b45eb4eda26670a9e4f221311be6e";
-  const authToken = "23c598fc8d69f7344406aa602aef02bc";
-  const accountSid = "ACbe11bf5856751706836158a633466d34";
+  const authToken = process.env.SMS_AUTH_TOKEN;
+  const accountSid = process.env.SMS_ACCOUNT_SID;
 
   const client = require("twilio")(accountSid, authToken);
 
@@ -22,13 +20,11 @@ const getNumberCallSendSMS = (message) => {
 };
 
 const sendSMS = (message, number) => {
-  console.log(message, number);
   var unirest = require("unirest");
 
   var req = unirest("GET", "https://www.fast2sms.com/dev/bulkV2");
   req.query({
-    authorization:
-      "B9Hy6Fvs3dJUo2cj175PeGOkKEA4TiVNLMWrq0XRhwZl8uCIQYOVePXyYrE6JMbj41iUHvR5owIWsh7x",
+    authorization: process.env.SMS_AUTHORIZATION,
     sender_id: "TXTIND",
     message: message,
     route: "v3",
@@ -172,7 +168,6 @@ const handleAppointment = (digit, pid, res, db) => {
                                       res.send(vr.toString());
                                     })
                                     .catch((err) => {
-                                      // vr.say("Couldn't book appointment");
                                       console.error(err);
                                     });
                                 })

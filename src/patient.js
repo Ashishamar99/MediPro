@@ -23,7 +23,7 @@ const handlePatientRegister = (req, res, db) => {
         console.error(err);
       });
   }).catch(function (err) {
-    res.status(400).send("unable to register");
+    res.status(500).json({ status: "ERROR", message: "Internal server error" });
     console.error(err);
   });
 };
@@ -42,6 +42,7 @@ const updatePatientRegister = (req, res, db) => {
     .then((isUpdated) => {
       if (isUpdated === 1) {
         res.status(200).send("Update successful!");
+        return;
       }
       res.status(404).send("Incorrect PID");
     })
@@ -85,7 +86,9 @@ const getPatientsList = (req, res, db) => {
       res.status(200).send(patients);
     })
     .catch((err) => {
-      res.status(400).send("Unable to get users");
+      res
+        .status(500)
+        .json({ status: "ERROR", message: "Internal server error" });
       console.error(err);
     });
 };

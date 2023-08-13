@@ -1,6 +1,8 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
+const dotenv = require("dotenv");
+dotenv.config();
 const app = express();
 const patient = require("./src/patient");
 const doctor = require("./src/doctor");
@@ -8,34 +10,13 @@ const consultation = require("./src/consultation/consultation");
 const appointment = require("./src/consultation/appointment");
 const booking = require("./src/consultation/book-appointment");
 const ivrHandler = require("./src/ivr");
+const knex = require("./src/knex");
+const db = require("knex")(knex.config);
+
 const multer = require("multer");
 let storage = multer.memoryStorage();
 let upload = multer({ storage: storage });
-const port = process.env.PORT || 3000;
-
-const productionServer = {
-  host: "voice-based-eprescription.c6evra5ifcck.us-east-2.rds.amazonaws.com",
-  user: "admin",
-  password: "abhi1234",
-  database: "voice-based-eprescription",
-};
-
-const localServer = {
-  host: "127.0.0.1",
-  user: "root",
-  password: "",
-  database: "voice_based_eprescription",
-};
-
-const db = require("knex")({
-  client: "mysql",
-  connection: {
-    host: localServer.host,
-    user: localServer.user,
-    password: localServer.password,
-    database: localServer.database,
-  },
-});
+const port = process.env.PORT || 5001;
 
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.json({ limit: "50mb" }));
