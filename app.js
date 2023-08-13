@@ -27,7 +27,7 @@ app.get("/health", (req, res) => {
     message: "OK",
     timestamp: new Date(),
   };
-  res.json({ healthcheck });
+  res.json(healthcheck);
 });
 
 //<--- Patient --->
