@@ -9,5 +9,5 @@ let config = {
     ssl: { rejectUnauthorized: false },
   },
 };
-console.log("DB init");
+
 module.exports = require("knex")(config);
