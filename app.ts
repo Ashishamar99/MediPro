@@ -14,7 +14,7 @@ import prisma from './src/database/prisma'
 import logger from './src/logger'
 dotenv.config()
 const app = express()
-const port = process.env.PORT ?? 5001
+const port = process.env.PORT ?? 5002
 
 const supabaseUrl = process.env.SUPABASE_URL ?? ''
 const supabaseKey = process.env.SUPABASE_KEY ?? ''
