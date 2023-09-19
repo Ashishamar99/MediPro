@@ -1,4 +1,5 @@
 import db from '../database/knex'
+import prisma from '../database/prisma'
 
 export const getDoctorsList = (req, res): void => {
   db.select('*')
@@ -12,21 +13,10 @@ export const getDoctorsList = (req, res): void => {
     })
 }
 
-export const getDoctorWithID = (req, res): void => {
+export const getDoctorWithID = async (req, res): Promise<void> => {
   const id = req.params.id
-  db.select('*')
-    .from('doctor')
-    .where('did', '=', id)
-    .then((doctor) => {
-      if (doctor && doctor[0].signature !== null) {
-        doctor[0].signature = doctor[0].signature.toString()
-      }
-      res.status(200).send(doctor)
-    })
-    .catch((err) => {
-      res.status(400).send('Unable to get user')
-      console.error(err)
-    })
+  const doctor = await prisma.doctor.findUnique({ where: { id } })
+  return res.json({ doctor })
 }
 
 export const handleDoctorLogin = (req, res): void => {

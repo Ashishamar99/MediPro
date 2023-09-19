@@ -12,7 +12,7 @@ datasource db {
 }
 
 model Doctor {
-  id           Int    @id @default(autoincrement())
+  id           String @id
   signatureUrl String @unique
   role         String
 }

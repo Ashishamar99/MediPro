@@ -2,56 +2,47 @@ import express from 'express'
 import bodyParser from 'body-parser'
 import cors from 'cors'
 import dotenv from 'dotenv'
-import { createClient } from '@supabase/supabase-js'
+// import { createClient } from '@supabase/supabase-js'
 
 import patientRouter from './src/routes/patient'
 import doctorRouter from './src/routes/doctor'
 import bookingRouter from './src/routes/booking'
 import consultationRouter from './src/routes/consultation'
 import appointmentRouter from './src/routes/appointment'
-import prisma from './src/database/prisma'
+// import prisma from './src/database/prisma'
 
 import logger from './src/logger'
 dotenv.config()
 const app = express()
 const port = process.env.PORT ?? 5002
 
-const supabaseUrl = process.env.SUPABASE_URL ?? ''
-const supabaseKey = process.env.SUPABASE_KEY ?? ''
+// const supabaseUrl = process.env.SUPABASE_URL ?? ''
+// const supabaseKey = process.env.SUPABASE_KEY ?? ''
 
-const supabase = createClient(supabaseUrl, supabaseKey)
-async function uploadFile (): Promise<void> {
-  const { data, error } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET ?? '') // Replace 'bucket_name' with your actual bucket name
-    .upload('', '', { contentType: 'image/jpeg' })
-  console.log(data)
-  if (error) {
-    console.error('Error uploading file:', error.message)
-  } else {
-    console.log('File uploaded successfully:')
+// const supabase = createClient(supabaseUrl, supabaseKey)
+// async function uploadFile (): Promise<void> {
+//   const { data, error } = await supabase.storage
+//     .from(process.env.SUPABASE_BUCKET ?? '') // Replace 'bucket_name' with your actual bucket name
+//     .upload('', '', { contentType: 'image/jpeg' })
+//   console.log(data)
+//   if (error) {
+//     console.error('Error uploading file:', error.message)
+//   } else {
+//     console.log('File uploaded successfully:')
 
-    const { data } = supabase.storage
-      .from(process.env.SUPABASE_BUCKET ?? '')
-      .getPublicUrl('')
-    console.log(data)
-  }
-}
+//     const { data } = supabase.storage
+//       .from(process.env.SUPABASE_BUCKET ?? '')
+//       .getPublicUrl('')
+//     console.log(data)
+//   }
+// }
 
-uploadFile().then(() => {}).catch(console.log)
+// uploadFile().then(() => {}).catch(console.log)
 app.use(cors({ origin: '*' }))
 app.use(bodyParser.json({ limit: '50mb' }))
 
 app.get('/health', (_req, res) => {
-  prisma.doctor
-    .findMany()
-    .then((doctors) => {
-      console.log(doctors)
-      res.json({ uptime: process.uptime(), message: 'OK', timestamp: new Date() })
-    })
-    .catch((error) => {
-      console.error(error)
-      res.status(500).json({ error: 'Internal Server Error' })
-    })
+  res.json({ uptime: process.uptime(), message: 'OK', timestamp: new Date() })
 })
 
 app.use('/patient', patientRouter)

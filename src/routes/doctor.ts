@@ -11,12 +11,16 @@ router.get('/', (req, res) => {
   doctorController.getDoctorsList(req, res)
 })
 
+// router.put('/complete', () => {
+//   doctorController
+// })
+
 router.get('/get-available-doctors', (req, res) => {
   doctorController.getAvailableDoctors(req, res)
 })
 
 router.get('/:id', (req, res) => {
-  doctorController.getDoctorWithID(req, res)
+  void doctorController.getDoctorWithID(req, res)
 })
 
 router.post('/get-doctor-with-role', (req, res) => {
