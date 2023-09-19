@@ -19,4 +19,4 @@ router.post("/", (req, res) => {
   consultationController.addConsultationInfo(req, res);
 });
 
-module.exports = router;
+export default router;

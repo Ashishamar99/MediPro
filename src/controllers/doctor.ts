@@ -1,4 +1,4 @@
-const db = require("../database/knex");
+import db from "../database/knex";
 
 const getDoctorsList = (req, res) => {
   db.select("*")

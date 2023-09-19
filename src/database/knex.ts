@@ -1,4 +1,6 @@
-let config = {
+import knex from "knex";
+let
+ config = {
   client: "mysql",
   connection: {
     connectionString: process.env.DB_CONNECTION_STRING,
@@ -10,4 +12,4 @@ let config = {
   },
 };
 
-module.exports = require("knex")(config);
+export default knex(config);

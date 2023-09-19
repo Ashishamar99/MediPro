@@ -1,7 +1,7 @@
-const dateTime = require("moment");
+import dateTime from "moment";
 const VoiceResponse = require("twilio").twiml.VoiceResponse;
-const querystring = require("querystring");
-const db = require("../database/knex");
+import querystring from "querystring";
+import db from "../database/knex";
 
 const getNumberCallSendSMS = (message) => {
   var number = "";
@@ -48,7 +48,7 @@ const bookingMenu = (req, res) => {
     body += chunk;
   });
   req.on("end", function () {
-    let enteredDigit = parseInt(querystring.parse(body).Digits);
+    let enteredDigit = parseInt(querystring.parse(body).Digits.toLocaleString());
     let pid = req.params.id;
     handleBookingMenu(enteredDigit, pid, res);
   });
@@ -70,7 +70,7 @@ const appointmentMenu = (req, res) => {
     body += chunk;
   });
   req.on("end", function () {
-    let enteredDigit = parseInt(querystring.parse(body).Digits);
+    let enteredDigit = parseInt(querystring.parse(body).Digits.toLocaleString());
     let pid = req.params.id;
     handleAppointment(enteredDigit, pid, res);
   });
@@ -96,8 +96,6 @@ const handleAppointment = (digit, pid, res) => {
         res.send(vr.toString());
       } else {
         did = doctor[0].did;
-        dname = doctor[0].dname;
-        dphno = doctor[0].dphno;
         let result = [];
         db.select()
           .from("slots")
@@ -158,14 +156,7 @@ const handleAppointment = (digit, pid, res) => {
                                         )}, details of booking will be shared to you through SMS.`,
                                         { voice: "Polly.Aditi" }
                                       );
-                                      getNumberCallSendSMS(
-                                        `Your Booking for ${bookingField} is successful, appointment at ${dateTime(
-                                          startTime,
-                                          "hh:mm a"
-                                        ).format(
-                                          "LT"
-                                        )}. Contact doctor ${dname} \n Phno: ${dphno}`
-                                      );
+                                     
                                       res.send(vr.toString());
                                     })
                                     .catch((err) => {
@@ -244,7 +235,7 @@ const handleConsultation = (pid, res) => {
     });
 };
 
-const handlePatientRegister = (res) => {
+const handlePatientRegister = (res, _twiml) => {
   db.insert({
     pname: null,
     ppasswd: null,
@@ -285,7 +276,7 @@ const handleLoginMenu = (req, res) => {
     body += chunk;
   });
   req.on("end", function () {
-    let id = parseInt(querystring.parse(body).Digits);
+    let id = parseInt(querystring.parse(body).Digits.toLocaleString());
     let twiml = new VoiceResponse();
     const gather = twiml.gather({
       action: `/ivr/booking-menu/${id}`,
@@ -321,7 +312,7 @@ const handleLoginMenu = (req, res) => {
   });
 };
 
-const handlePatientLogin = (res) => {
+const handlePatientLogin = (res, _twiml) => {
   let twiml = new VoiceResponse();
 
   const gather = twiml.gather({
@@ -353,7 +344,7 @@ const ivrMenu = (req, res) => {
     body += chunk;
   });
   req.on("end", function () {
-    let enteredDigit = parseInt(querystring.parse(body).Digits);
+    let enteredDigit = parseInt(querystring.parse(body).Digits.toLocaleString());
     greetUser(enteredDigit, res);
   });
   res.type("text/xml");

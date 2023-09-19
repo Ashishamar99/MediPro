@@ -1,6 +1,6 @@
-const express = require("express");
+import express from "express";
 const router = express.Router();
-const appointmentController = require("../controllers/appointment");
+import * as appointmentController from "../controllers/appointment";
 
 router.get("/", (req, res) => {
   appointmentController.getAppointmentList(req, res);
@@ -22,4 +22,4 @@ router.post("/cancel", (req, res) => {
   appointmentController.cancelAppointment(req, res);
 });
 
-module.exports = router;
+export default router;

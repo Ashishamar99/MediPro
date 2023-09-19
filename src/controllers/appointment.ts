@@ -1,6 +1,6 @@
-const db = require("../database/knex");
+import db from "../database/knex";
 
-const getAppointmentList = (req, res) => {
+export const getAppointmentList = (req, res) => {
   db.select("*")
     .from("appointments")
     .then((appointments) => {
@@ -12,7 +12,7 @@ const getAppointmentList = (req, res) => {
     });
 };
 
-const cancelAppointment = (req, res) => {
+export const cancelAppointment = (req, res) => {
   const { bid, slotNo, did } = req.body;
   db("appointments")
     .where("bid", bid)
@@ -44,7 +44,7 @@ const cancelAppointment = (req, res) => {
     });
 };
 
-const getAppointmentWithID = (req, res) => {
+export const getAppointmentWithID = (req, res) => {
   const bid = req.params.id;
   db.select("*")
     .from("appointments")
@@ -58,7 +58,7 @@ const getAppointmentWithID = (req, res) => {
     });
 };
 
-const getAppointmentWithPID = (req, res) => {
+export const getAppointmentWithPID = (req, res) => {
   const pid = req.params.id;
   db.select("*")
     .from("appointments")
@@ -72,7 +72,7 @@ const getAppointmentWithPID = (req, res) => {
     });
 };
 
-const getAppointmentWithDID = (req, res) => {
+export const getAppointmentWithDID = (req, res) => {
   const did = req.params.id;
   db.select("*")
     .from("appointments")
@@ -86,10 +86,3 @@ const getAppointmentWithDID = (req, res) => {
     });
 };
 
-module.exports = {
-  getAppointmentList: getAppointmentList,
-  getAppointmentWithID: getAppointmentWithID,
-  getAppointmentWithPID: getAppointmentWithPID,
-  getAppointmentWithDID: getAppointmentWithDID,
-  cancelAppointment: cancelAppointment,
-};

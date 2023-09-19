@@ -1,5 +1,5 @@
-const dateTime = require("moment");
-const db = require("../database/knex");
+import dateTime from "moment";
+import db from "../database/knex";
 
 const getSlots = (req, res) => {
   //returns all slots (including booked slots)

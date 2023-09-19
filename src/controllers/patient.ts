@@ -1,4 +1,4 @@
-const db = require("../database/knex");
+import db from "../database/knex";
 
 const handlePatientRegister = (req, res) => {
   const { name, phno, gender, email, dob, password } = req.body;

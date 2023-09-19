@@ -23,4 +23,4 @@ router.post("/login", (req, res) => {
   patientController.handlePatientLogin(req, res);
 });
 
-module.exports = router;
+export default router;

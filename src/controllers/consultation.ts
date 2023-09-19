@@ -1,5 +1,4 @@
-const sendSMS = require("../controllers/ivr").sendSMS;
-const db = require("../database/knex");
+import db from "../database/knex";
 
 const getConsultationList = (req, res) => {
   db.select("*")

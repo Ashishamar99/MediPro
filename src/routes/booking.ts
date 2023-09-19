@@ -18,4 +18,4 @@ router.post("/unblock-slots", (req, res) => {
   bookingController.unblockAllSlots(req, res);
 });
 
-module.exports = router;
+export default router;
