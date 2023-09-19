@@ -1,3 +1,4 @@
+import { createClient } from '@supabase/supabase-js'
 import db from '../database/knex'
 import prisma from '../database/prisma'
 
@@ -50,34 +51,40 @@ export const handleDoctorLogin = (req, res): void => {
     })
 }
 
-export const handleDoctorRegister = (req, res): void => {
-  const { name, phno, email, password, role, signature } = req.body
-  db.transaction(async function (trx) {
-    const doctor = {
-      dname: name,
-      dpasswd: password,
-      demail: email,
-      dphno: phno,
-      role: role.toLowerCase(),
-      signature
-    }
+interface DoctorData {
+  id: string;
+  signatureUrl: string;
+  role: string;
+}
 
-    await trx
-      .insert(doctor)
-      .into('doctor')
-      .then((id) => {
-        // trx.commit
-        res.status(200).send(id)
-      })
-      .catch((err) => {
-        // trx.rollback
-        res.status(400).send('User already exists')
-        console.error(err)
-      })
-  }).catch(function (err) {
-    res.status(400).send('unable to register')
-    console.error(err)
-  })
+async function uploadFile(file, buffer): Promise<any> {
+  const supabaseUrl = process.env.SUPABASE_URL ?? ''
+  const supabaseKey = process.env.SUPABASE_KEY ?? ''
+  const supabase = createClient(supabaseUrl, supabaseKey)
+
+  const { error } = await supabase.storage
+    .from(process.env.SUPABASE_BUCKET ?? '')
+    .upload(file, buffer, { contentType: 'image/png' })
+
+  const { data } = supabase.storage
+    .from(process.env.SUPABASE_BUCKET ?? '')
+    .getPublicUrl(file);
+
+  if (error) console.log(error);
+  return data;
+}
+
+export const handleDoctorRegister = (req, res): void => {
+  const { id, role }: { id: string, role: string } = req.body;
+  const file = req.file;
+  uploadFile(file.originalname, file.buffer).then((data) => {
+    let signatureUrl: string = data.publicUrl
+    let doctor: DoctorData = { id, role, signatureUrl }
+
+    prisma.doctor.create({ data: doctor }).then((data) => {
+      return res.json(data);
+    }).catch(console.log)
+  }).catch(console.log)
 }
 
 export const getDoctorWithRole = (req, res): void => {

@@ -27,7 +27,7 @@ router.post('/get-doctor-with-role', (req, res) => {
   doctorController.getDoctorWithRole(req, res)
 })
 
-router.post('/register', upload.single('sign-image'), (req, res) => {
+router.post('/register', upload.single('signature'), (req, res) => {
   doctorController.handleDoctorRegister(req, res)
 })
 
