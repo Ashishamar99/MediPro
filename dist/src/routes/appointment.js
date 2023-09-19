@@ -27,21 +27,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
-const router = express_1.default.Router();
 const appointmentController = __importStar(require("../controllers/appointment"));
-router.get("/", (req, res) => {
+const router = express_1.default.Router();
+router.get('/', (req, res) => {
     appointmentController.getAppointmentList(req, res);
 });
-router.get("/:id", (req, res) => {
+router.get('/:id', (req, res) => {
     appointmentController.getAppointmentWithID(req, res);
 });
-router.get("/patient/:id", (req, res) => {
+router.get('/patient/:id', (req, res) => {
     appointmentController.getAppointmentWithPID(req, res);
 });
-router.get("/doctor/:id", (req, res) => {
+router.get('/doctor/:id', (req, res) => {
     appointmentController.getAppointmentWithDID(req, res);
 });
-router.post("/cancel", (req, res) => {
+router.post('/cancel', (req, res) => {
     appointmentController.cancelAppointment(req, res);
 });
 exports.default = router;

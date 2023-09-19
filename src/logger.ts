@@ -1,4 +1,4 @@
-const { createLogger, format, transports } = require("winston");
+import { createLogger, format, transports } from 'winston'
 
 const logLevels = {
   fatal: 0,
@@ -6,15 +6,14 @@ const logLevels = {
   warn: 2,
   info: 3,
   debug: 4,
-  trace: 5,
-};
+  trace: 5
+}
 
 const logger = createLogger({
-  level: "warn",
+  level: 'warn',
   levels: logLevels,
   format: format.combine(format.timestamp(), format.json()),
-  transports: [new transports.Console({ level: "info" })],
-});
+  transports: [new transports.Console({ level: 'info' })]
+})
 
-export default logger;
-
+export default logger
