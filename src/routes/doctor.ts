@@ -23,11 +23,15 @@ router.get('/:id', (req, res) => {
   void doctorController.getDoctorWithID(req, res)
 })
 
+router.delete('/:id', (req, res) => {
+  void doctorController.deleteDoctorWithID(req, res)
+})
+
 router.post('/get-doctor-with-role', (req, res) => {
   doctorController.getDoctorWithRole(req, res)
 })
 
-router.post('/register', upload.single('signature'), (req, res) => {
+router.post('/register', upload.single('signature'), async (req, res) => {
   doctorController.handleDoctorRegister(req, res)
 })
 

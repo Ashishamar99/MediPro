@@ -39,7 +39,7 @@ const port = process.env.PORT ?? 5002
 
 // uploadFile().then(() => {}).catch(console.log)
 app.use(cors({ origin: '*' }))
-app.use(bodyParser.json({ limit: '50mb' }))
+app.use(bodyParser.json({ limit: '5mb' }))
 
 app.get('/health', (_req, res) => {
   res.json({ uptime: process.uptime(), message: 'OK', timestamp: new Date() })
