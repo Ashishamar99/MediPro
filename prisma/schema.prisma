@@ -12,7 +12,8 @@ datasource db {
 }
 
 model Doctor {
-  id           String @id
-  signatureUrl String @unique
-  role         String
+  id                String @id
+  signatureUrl      String @unique
+  signatureFilename String @unique
+  role              String
 }
