@@ -2,6 +2,10 @@ import { createClient } from '@supabase/supabase-js'
 import db from '../database/knex'
 import prisma from '../database/prisma'
 
+const supabaseUrl = process.env.SUPABASE_URL ?? ''
+const supabaseKey = process.env.SUPABASE_KEY ?? ''
+const supabase = createClient(supabaseUrl, supabaseKey)
+
 export const getDoctorsList = async (req, res): Promise<void> => {
   return res.json({ data: await prisma.doctor.findMany() })
 }
@@ -51,9 +55,6 @@ interface DoctorData {
 }
 
 async function uploadFile(filename, buffer): Promise<any> {
-  const supabaseUrl = process.env.SUPABASE_URL ?? ''
-  const supabaseKey = process.env.SUPABASE_KEY ?? ''
-  const supabase = createClient(supabaseUrl, supabaseKey)
   const { error } = await supabase.storage
     .from(process.env.SUPABASE_BUCKET ?? '')
     .upload(filename, buffer, { contentType: 'image/png' })
@@ -107,9 +108,16 @@ export const getAvailableDoctors = (req, res): void => {
 
 export const deleteDoctorWithID = async (req, res): Promise<void> => {
   const id = req.params.id;
-  // const doctor = await prisma.doctor.findUnique({ where: { id } });
+  const doctor: DoctorData | null = await prisma.doctor.findUnique({ where: { id } });
 
-  // const data = await prisma.doctor.delete({ where: { id } })
-  const data = await prisma.doctor.deleteMany();
+  if (doctor) {
+    await supabase
+      .storage
+      .from('medipro-signatures')
+      .remove([doctor.signatureFilename])
+  }
+
+  const data = await prisma.doctor.delete({ where: { id } })
+  // const data = await prisma.doctor.deleteMany();
   return res.json({ data });
 }
