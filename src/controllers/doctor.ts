@@ -50,19 +50,16 @@ interface DoctorData {
   role: string;
 }
 
-async function uploadFile(file, buffer): Promise<any> {
+async function uploadFile(filename, buffer): Promise<any> {
   const supabaseUrl = process.env.SUPABASE_URL ?? ''
   const supabaseKey = process.env.SUPABASE_KEY ?? ''
   const supabase = createClient(supabaseUrl, supabaseKey)
-  const FILENAME = `${Date.now().toString()}-${file}`
   const { error } = await supabase.storage
     .from(process.env.SUPABASE_BUCKET ?? '')
-    .upload(FILENAME, buffer, { contentType: 'image/png' })
-  console.log('error: ', FILENAME)
+    .upload(filename, buffer, { contentType: 'image/png' })
   const { data } = supabase.storage
     .from(process.env.SUPABASE_BUCKET ?? '')
-    .getPublicUrl(FILENAME);
-  console.log('error: ', FILENAME)
+    .getPublicUrl(filename);
 
   if (error) console.log(error);
   return data;
@@ -71,9 +68,11 @@ async function uploadFile(file, buffer): Promise<any> {
 export const handleDoctorRegister = async (req, res): Promise<void> => {
   const { id, role }: { id: string, role: string } = req.body;
   const file = req.file;
-  let data = await uploadFile(file.originalname, file.buffer);
+  const FILENAME = `${Date.now().toString()}-${file.originalname}`
+
+  let data = await uploadFile(FILENAME, file.buffer);
   let signatureUrl: string = data.publicUrl
-  let signatureFilename: string = file.originalname;
+  let signatureFilename: string = FILENAME;
   let doctor: DoctorData = { id, role, signatureUrl, signatureFilename }
   let response = await prisma.doctor.create({ data: doctor });
   return res.json(response);
