@@ -48,35 +48,35 @@ export const handleDoctorLogin = (req, res): void => {
 }
 
 interface DoctorData {
-  id: string;
-  signatureUrl: string;
-  signatureFilename: string;
-  role: string;
+  id: string
+  signatureUrl: string
+  signatureFilename: string
+  role: string
 }
 
-async function uploadFile(filename, buffer): Promise<any> {
+async function uploadFile (filename, buffer): Promise<any> {
   const { error } = await supabase.storage
     .from(process.env.SUPABASE_BUCKET ?? '')
     .upload(filename, buffer, { contentType: 'image/png' })
   const { data } = supabase.storage
     .from(process.env.SUPABASE_BUCKET ?? '')
-    .getPublicUrl(filename);
+    .getPublicUrl(filename)
 
-  if (error) console.log(error);
-  return data;
+  if (error) console.log(error)
+  return data
 }
 
 export const handleDoctorRegister = async (req, res): Promise<void> => {
-  const { id, role }: { id: string, role: string } = req.body;
-  const file = req.file;
+  const { id, role }: { id: string, role: string } = req.body
+  const file = req.file
   const FILENAME = `${Date.now().toString()}-${file.originalname}`
 
-  let data = await uploadFile(FILENAME, file.buffer);
-  let signatureUrl: string = data.publicUrl
-  let signatureFilename: string = FILENAME;
-  let doctor: DoctorData = { id, role, signatureUrl, signatureFilename }
-  let response = await prisma.doctor.create({ data: doctor });
-  return res.json(response);
+  const data = await uploadFile(FILENAME, file.buffer)
+  const signatureUrl: string = data.publicUrl
+  const signatureFilename: string = FILENAME
+  const doctor: DoctorData = { id, role, signatureUrl, signatureFilename }
+  const response = await prisma.doctor.create({ data: doctor })
+  return res.json(response)
 }
 
 export const getDoctorWithRole = (req, res): void => {
@@ -107,8 +107,8 @@ export const getAvailableDoctors = (req, res): void => {
 }
 
 export const deleteDoctorWithID = async (req, res): Promise<void> => {
-  const id = req.params.id;
-  const doctor: DoctorData | null = await prisma.doctor.findUnique({ where: { id } });
+  const id = req.params.id
+  const doctor: DoctorData | null = await prisma.doctor.findUnique({ where: { id } })
 
   if (doctor) {
     await supabase
@@ -119,5 +119,5 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
 
   const data = await prisma.doctor.delete({ where: { id } })
   // const data = await prisma.doctor.deleteMany();
-  return res.json({ data });
+  return res.json({ data })
 }
