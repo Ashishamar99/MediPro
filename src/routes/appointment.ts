@@ -3,7 +3,11 @@ import * as appointmentController from '../controllers/appointment'
 const router = express.Router()
 
 router.get('/', (req, res) => {
-  appointmentController.getAppointmentList(req, res)
+  void appointmentController.getAppointmentList(req, res)
+})
+
+router.get('/doctor', (req, res) => {
+  void appointmentController.getAppointmentForDoctor(req, res)
 })
 
 router.get('/:id', (req, res) => {

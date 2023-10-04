@@ -49,12 +49,15 @@ export const handleDoctorLogin = (req, res): void => {
 
 interface DoctorData {
   id: string
+  name: string
+  imageUrl: string
+  phone: string
   signatureUrl: string
   signatureFilename: string
   role: string
 }
 
-async function uploadFile (filename, buffer): Promise<any> {
+const uploadFile = async (filename, buffer): Promise<any> => {
   const { error } = await supabase.storage
     .from(process.env.SUPABASE_BUCKET ?? '')
     .upload(filename, buffer, { contentType: 'image/png' })
@@ -67,14 +70,16 @@ async function uploadFile (filename, buffer): Promise<any> {
 }
 
 export const handleDoctorRegister = async (req, res): Promise<void> => {
-  const { id, role }: { id: string, role: string } = req.body
+  let { user } = req.body
+  user = JSON.parse(user)
   const file = req.file
   const FILENAME = `${Date.now().toString()}-${file.originalname}`
 
   const data = await uploadFile(FILENAME, file.buffer)
-  const signatureUrl: string = data.publicUrl
-  const signatureFilename: string = FILENAME
-  const doctor: DoctorData = { id, role, signatureUrl, signatureFilename }
+  user.signatureUrl = data.publicUrl
+  user.signatureFilename = FILENAME
+
+  const doctor: DoctorData = user
   const response = await prisma.doctor.create({ data: doctor })
   return res.json(response)
 }

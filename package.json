@@ -23,9 +23,9 @@
   "main": "dist/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc --watch && nodemon dist/app.js",
+    "dev": "tsc --watch & nodemon dist/app.js",
     "start": "yarn build && node dist/app.js",
-    "build": "yarn && tsc",
+    "build": "tsc",
     "lint": "eslint . --ext .ts"
   },
   "repository": {

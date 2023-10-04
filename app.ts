@@ -16,6 +16,28 @@ dotenv.config()
 const app = express()
 const port = process.env.PORT ?? 5002
 
+// const supabaseUrl = process.env.SUPABASE_URL ?? ''
+// const supabaseKey = process.env.SUPABASE_KEY ?? ''
+
+// const supabase = createClient(supabaseUrl, supabaseKey)
+// async function uploadFile (): Promise<void> {
+//   const { data, error } = await supabase.storage
+//     .from(process.env.SUPABASE_BUCKET ?? '') // Replace 'bucket_name' with your actual bucket name
+//     .upload('', '', { contentType: 'image/jpeg' })
+//   console.log(data)
+//   if (error) {
+//     console.error('Error uploading file:', error.message)
+//   } else {
+//     console.log('File uploaded successfully:')
+
+//     const { data } = supabase.storage
+//       .from(process.env.SUPABASE_BUCKET ?? '')
+//       .getPublicUrl('')
+//     console.log(data)
+//   }
+// }
+
+// uploadFile().then(() => {}).catch(console.log)
 app.use(cors({ origin: '*' }))
 app.use(bodyParser.json({ limit: '5mb' }))
 

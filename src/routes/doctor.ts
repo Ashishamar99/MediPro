@@ -8,7 +8,7 @@ const storage = multer.memoryStorage()
 const upload = multer({ storage })
 
 router.get('/', (req, res) => {
-  doctorController.getDoctorsList(req, res)
+  void doctorController.getDoctorsList(req, res)
 })
 
 // router.put('/complete', () => {
@@ -31,8 +31,8 @@ router.post('/get-doctor-with-role', (req, res) => {
   doctorController.getDoctorWithRole(req, res)
 })
 
-router.post('/register', upload.single('signature'), async (req, res) => {
-  doctorController.handleDoctorRegister(req, res)
+router.post('/register', upload.single('signature'), (req, res) => {
+  void doctorController.handleDoctorRegister(req, res)
 })
 
 router.post('/login', (req, res) => {

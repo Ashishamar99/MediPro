@@ -1,4 +1,5 @@
 import db from '../database/knex'
+import prisma from '../database/prisma'
 
 export const handlePatientRegister = (req, res): void => {
   const { name, phno, gender, email, dob, password } = req.body
@@ -81,18 +82,8 @@ export const handlePatientLogin = (req, res): void => {
     .catch((err) => res.status(400).json(err))
 }
 
-export const getPatientsList = (req, res): void => {
-  db.select('*')
-    .from('patient')
-    .then((patients) => {
-      res.status(200).send(patients)
-    })
-    .catch((err) => {
-      res
-        .status(500)
-        .json({ status: 'ERROR', message: 'Internal server error' })
-      console.error(err)
-    })
+export const getPatientsList = async (req, res): Promise<void> => {
+  return res.json({ data: await prisma.patient.findMany() })
 }
 
 export const getPatientWithID = (req, res): void => {

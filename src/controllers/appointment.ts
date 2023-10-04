@@ -1,15 +1,43 @@
+import moment from 'moment'
 import db from '../database/knex'
+import prisma from '../database/prisma'
 
-export const getAppointmentList = (req, res): void => {
-  db.select('*')
-    .from('appointments')
-    .then((appointments) => {
-      res.status(200).send(appointments)
+export const getAppointmentList = async (req, res): Promise<void> => {
+  return res.json({ data: await prisma.appointment.findMany() })
+}
+
+export const getAppointmentForDoctor = async (req, res): Promise<void> => {
+  try {
+    const appointments = await prisma.appointment.findMany({
+      include: {
+        doctor: {
+          select: {
+            role: true
+          }
+        },
+        patient: {
+          select: {
+            name: true
+          }
+        }
+      }
     })
-    .catch((err) => {
-      res.send('Unable to get appointment details')
-      console.error(err)
-    })
+
+    const data = appointments.map((appointment) => ({
+      booking_time: moment(appointment.booking_time).format('MMM Do'),
+      patient_name: appointment.patient.name,
+      role: appointment.doctor.role,
+      end_time: moment(appointment.end_time).format('LT'),
+      id: appointment.id,
+      patient_id: appointment.patient_id,
+      start_time: moment(appointment.start_time).format('LT')
+    }))
+
+    return res.json(data)
+  } catch (error) {
+    console.error('Error fetching data:', error)
+    return res.status(500).json({ error: 'Internal server error' })
+  }
 }
 
 export const cancelAppointment = (req, res): void => {

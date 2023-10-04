@@ -12,8 +12,35 @@ datasource db {
 }
 
 model Doctor {
-  id                String @id
-  signatureUrl      String @unique
-  signatureFilename String @unique
+  id                String        @id
+  name              String
+  phone             String        @unique
+  imageUrl          String
+  signatureUrl      String        @unique
+  signatureFilename String        @unique
   role              String
+  Appointment       Appointment[]
+}
+
+model Patient {
+  id          String        @id
+  name        String
+  phone       String        @unique
+  imageUrl    String
+  age         Int
+  Appointment Appointment[]
+}
+
+model Appointment {
+  id           String   @id
+  doctor       Doctor   @relation(fields: [doctor_id], references: [id])
+  patient      Patient  @relation(fields: [patient_id], references: [id])
+  doctor_id    String
+  patient_id   String
+  start_time   DateTime
+  end_time     DateTime
+  booking_time DateTime
+
+  @@index([doctor_id])
+  @@index([patient_id])
 }
