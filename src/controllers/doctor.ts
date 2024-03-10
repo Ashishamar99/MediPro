@@ -5,6 +5,7 @@ import { Request, Response } from "express";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { Status } from "../enums/status";
+import bcrypt from "bcrypt";
 
 const supabaseUrl = process.env.SUPABASE_URL ?? "";
 const supabaseKey = process.env.SUPABASE_KEY ?? "";
@@ -14,8 +15,9 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 const userSchema = z.object({
   user: z.object({
     name: z.string(),
-    phone: z.string(),
-    role: z.string()
+    phone: z.string().min(10).max(10),
+    role: z.string(),
+    password: z.string()
   })
 });
 
@@ -72,6 +74,7 @@ interface DoctorData {
   signatureUrl: string;
   signatureFilename: string;
   role: string;
+  password: string;
 }
 
 const uploadFileToSupabase = async (filename: string, buffer: File): Promise<any> => {
@@ -87,9 +90,11 @@ const uploadFileToSupabase = async (filename: string, buffer: File): Promise<any
 };
 
 const handleFileUpload = async (req): Promise<DoctorData> => {
+  console.log(req.body)
   let { user } = req.body;
   const filename = `${Date.now().toString()}-${req.file.originalname}`;
   const data = await uploadFileToSupabase(filename, req.file.buffer);
+
   user.signatureUrl = data.publicUrl;
   user.signatureFilename = filename;
   user.id = user.id || randomUUID();
@@ -106,18 +111,15 @@ export const handleDoctorRegister = async (req: Request, res: Response): Promise
     return res.status(400).json({ status: Status.FAILED, code: 400, message: result.error })
   }
 
-  let doctor: DoctorData | null = await prisma.doctor.findUnique({ where: { phone: req.body.user.phone } });
-
-  if (doctor) {
-    return res.status(400).json({ status: Status.FAILED, message: "User already exists" })
-  }
-
-  
-
   try {
-    doctor = await handleFileUpload({file: req.file, body: req.body.user});
+    let doctor = await prisma.doctor.findUnique({ where: { phone: req.body.user.phone } });
+    if (doctor) {
+      return res.status(400).json({ status: Status.FAILED, message: "User already exists" })
+    }
+    doctor = await handleFileUpload({ file: req.file, body: req.body });
+    doctor.password = await bcrypt.hash(doctor.password, 10);
     let response = await prisma.doctor.create({ data: doctor });
-    return res.status(201).json({ status: Status.SUCCESS, message: "Doctor registered successfully", data: response });
+    return res.status(201).json({ status: Status.SUCCESS, message: "Doctor registered successfully", data: { ...response, password: undefined } });
   } catch (err) {
     console.log(err)
     return res.status(500).json({ status: Status.ERROR, message: err });
@@ -154,7 +156,7 @@ export const getAvailableDoctors = (req, res): void => {
 
 export const deleteDoctorWithID = async (req, res): Promise<void> => {
   const id = req.params.id;
-  const doctor: DoctorData | null = await prisma.doctor.findUnique({
+  const doctor = await prisma.doctor.findUnique({
     where: { id },
   });
   if (doctor === null) {

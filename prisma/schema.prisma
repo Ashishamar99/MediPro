@@ -19,6 +19,7 @@ model Doctor {
   signatureUrl      String        @unique
   signatureFilename String        @unique
   role              String
+  password          String
   Appointment       Appointment[]
 }
 
@@ -28,6 +29,7 @@ model Patient {
   phone       String        @unique
   imageUrl    String
   age         Int
+  password    String
   Appointment Appointment[]
 }
 
