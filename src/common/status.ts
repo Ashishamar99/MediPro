@@ -12,5 +12,4 @@ export enum Status {
     TOO_MANY_REQUESTS = "too_many_requests",
     GATEWAY_TIMEOUT = "gateway_timeout",
     SERVICE_UNAVAILABLE = "service_unavailable",
-    
 }
