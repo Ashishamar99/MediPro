@@ -5,7 +5,7 @@ import { PrismaClient } from '@prisma/client'
 class PrismaSingleton {
   private readonly prisma: PrismaClient
 
-  private static instance: PrismaSingleton | null = null // Initialize with null
+  private static instance: PrismaSingleton | null = null
 
   private constructor () {
     this.prisma = new PrismaClient()
