@@ -1,6 +1,7 @@
 import express from 'express'
 import * as doctorController from '../controllers/doctor'
 import multer from 'multer'
+import { auth } from '../middleware/auth'
 
 const router = express.Router()
 
@@ -11,23 +12,19 @@ router.get('/', (req, res) => {
   void doctorController.getDoctorsList(req, res)
 })
 
-// router.put('/complete', () => {
-//   doctorController
-// })
-
-router.get('/get-available-doctors', (req, res) => {
+router.get('/get-available-doctors', auth, (req, res) => {
   doctorController.getAvailableDoctors(req, res)
 })
 
-router.get('/:id', (req, res) => {
+router.get('/:id', auth, (req, res) => {
   void doctorController.getDoctorWithID(req, res)
 })
 
-router.delete('/:id', (req, res) => {
+router.delete('/:id', auth, (req, res) => {
   void doctorController.deleteDoctorWithID(req, res)
 })
 
-router.post('/get-doctor-with-role', (req, res) => {
+router.post('/get-doctor-with-role', auth, (req, res) => {
   doctorController.getDoctorWithRole(req, res)
 })
 
