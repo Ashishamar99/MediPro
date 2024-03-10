@@ -6,6 +6,7 @@ import { z } from "zod";
 import { randomUUID } from "crypto";
 import { Status } from "../enums/status";
 import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
 const supabaseUrl = process.env.SUPABASE_URL ?? "";
 const supabaseKey = process.env.SUPABASE_KEY ?? "";
@@ -59,9 +60,25 @@ export const getDoctorWithID = async (req: Request, res: Response): Promise<Resp
 };
 
 
-export const handleDoctorLogin = (req, res): void => {
+export const handleDoctorLogin = async (req, res) => {
   const { phone, password } = req.body;
-  let doctor = prisma.doctor.findUnique({ where: { phone } });
+  console.log(req.body)
+  let doctor = await prisma.doctor.findUnique({ where: { phone } });
+  if (!doctor) {
+    return res.status(404).json({ status: "Failed", message: "User not found" });
+  }
+  const isPasswordValid = await bcrypt.compare(password, doctor.password);
+  if (!isPasswordValid) {
+    return res.status(401).json({ status: "Failed", message: "Invalid credentials" });
+  }
+
+  try {
+    const token = jwt.sign({ phone }, process.env.JWT_SECRET, { expiresIn: "1h" });
+    return res.status(200).json({ status: "Success", message: "Login successful", token });
+  }
+  catch (err) {
+    return res.status(500).json({ status: "Failed", message: "Internal server error" });
+  }
 
 
 };
@@ -90,7 +107,6 @@ const uploadFileToSupabase = async (filename: string, buffer: File): Promise<any
 };
 
 const handleFileUpload = async (req): Promise<DoctorData> => {
-  console.log(req.body)
   let { user } = req.body;
   const filename = `${Date.now().toString()}-${req.file.originalname}`;
   const data = await uploadFileToSupabase(filename, req.file.buffer);
