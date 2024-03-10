@@ -24,7 +24,7 @@ export const getAppointmentForDoctor = async (req, res): Promise<void> => {
     })
 
     const data = appointments.map((appointment) => ({
-      booking_time: moment(appointment.booking_time).format('MMM Do'),
+      booking_time: moment(appointment.createdAt).format('MMM Do'),
       patient_name: appointment.patient.name,
       role: appointment.doctor.role,
       end_time: moment(appointment.end_time).format('LT'),

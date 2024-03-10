@@ -6,5 +6,8 @@ export interface DoctorData {
     signatureUrl: string;
     signatureFilename: string;
     role: string;
+    isAvailable: boolean;
+    createdAt: Date;
+    updatedAt: Date;
     password: string;
 }

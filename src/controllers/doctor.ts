@@ -1,5 +1,4 @@
 import { createClient } from "@supabase/supabase-js";
-import db from "../database/knex";
 import prisma from "../database/prisma";
 import { Request, Response } from "express";
 import { randomUUID } from "crypto";
@@ -102,31 +101,23 @@ export const handleDoctorRegister = async (req: Request, res: Response): Promise
 
 };
 
-export const getDoctorWithRole = (req, res): void => {
-  const role = req.body.role;
-  db.select("*")
-    .from("doctor")
-    .where({ role, isAvailable: "1" })
-    .then((doctor) => {
-      res.status(200).send(doctor[0]); // return only one doctor
-    })
-    .catch((err) => {
-      res.status(400).send("Unable to get user");
-      console.error(err);
-    });
+export const getDoctorWithRole = async (req, res): Promise<Response<void>> => {
+  const role: string = req.body.role;
+  if (!role) {
+    return res.status(400).json({ status: Status.FAILED, message: "Role is required" });
+  }
+  const doctor = await prisma.doctor.findFirst({ where: { role } });
+  return res.status(200).json({status: Status.SUCCESS, data: {...doctor, password: undefined}});
 };
 
-export const getAvailableDoctors = (req, res): void => {
-  db.select("*")
-    .from("doctor")
-    .where({ isAvailable: "1" })
-    .then((doctor) => {
-      res.status(200).send(doctor);
-    })
-    .catch((err) => {
-      res.status(400).send("Unable to get user");
-      console.error(err);
-    });
+export const getAvailableDoctors = async (_req, res): Promise<Response<void>> => {
+  try {
+    const doctors = await prisma.doctor.findMany({ where: { isAvailable: true }, select: { id: true, name: true, role: true }});
+    return res.status(200).json({ status: Status.SUCCESS, data: doctors });
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({ status: Status.ERROR, message: err });
+  }
 };
 
 export const deleteDoctorWithID = async (req, res): Promise<void> => {
