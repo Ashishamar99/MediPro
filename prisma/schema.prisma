@@ -12,36 +12,42 @@ datasource db {
 }
 
 model Doctor {
-  id                String        @id
+  id                String        @id @default(uuid())
   name              String
   phone             String        @unique
   imageUrl          String
-  signatureUrl      String        @unique
-  signatureFilename String        @unique
+  signatureUrl      String
+  signatureFilename String
   role              String
   password          String
+  isAvailable       Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @default(now())
   Appointment       Appointment[]
 }
 
 model Patient {
-  id          String        @id
+  id          String        @id @default(uuid())
   name        String
   phone       String        @unique
   imageUrl    String
   age         Int
   password    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
   Appointment Appointment[]
 }
 
 model Appointment {
-  id           String   @id
-  doctor       Doctor   @relation(fields: [doctor_id], references: [id])
-  patient      Patient  @relation(fields: [patient_id], references: [id])
-  doctor_id    String
-  patient_id   String
-  start_time   DateTime
-  end_time     DateTime
-  booking_time DateTime
+  id         String   @id @default(uuid())
+  doctor     Doctor   @relation(fields: [doctor_id], references: [id])
+  patient    Patient  @relation(fields: [patient_id], references: [id])
+  doctor_id  String
+  patient_id String
+  start_time DateTime
+  end_time   DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
 
   @@index([doctor_id])
   @@index([patient_id])

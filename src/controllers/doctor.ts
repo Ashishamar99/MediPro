@@ -1,34 +1,18 @@
 import { createClient } from "@supabase/supabase-js";
-import db from "../database/knex";
 import prisma from "../database/prisma";
 import { Request, Response } from "express";
-import { z } from "zod";
 import { randomUUID } from "crypto";
-import { Status } from "../enums/status";
+import { Status } from "../common/status";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import { DoctorData } from "../common/types";
+import { doctorRegisterSchema } from "../schemas/doctor.schema";
+import { uploadFileToSupabase } from "../common/helper";
 
 const supabaseUrl = process.env.SUPABASE_URL ?? "";
 const supabaseKey = process.env.SUPABASE_KEY ?? "";
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-
-const userSchema = z.object({
-  user: z.object({
-    name: z.string(),
-    phone: z.string().min(10).max(10),
-    role: z.string(),
-    password: z.string()
-  })
-});
-
-const doctorRegisterSchema = z.object({
-  file: z.any().refine(
-    (file) => typeof file !== typeof File,
-    `File is required`
-  ),
-  body: userSchema
-})
 
 export const getDoctorsList = async (
   _req: Request,
@@ -55,67 +39,41 @@ export const getDoctorsList = async (
 
 export const getDoctorWithID = async (req: Request, res: Response): Promise<Response> => {
   const id = req.params.id;
-  const doctor = await prisma.doctor.findUnique({ where: { id } });
-  return res.json({ doctor });
+  try {
+    const doctor = await prisma.doctor.findUnique({ where: { id } });
+    return res.json({ status: Status.SUCCESS, ...doctor, password: undefined });
+
+  } catch (err) {
+    return res.json({ status: Status.ERROR, message: err });
+  }
 };
 
-
+/**
+ * Function to handle doctor login
+ * @param req - Request 
+ * @param res - Response
+ * @returns  Response 
+ */
 export const handleDoctorLogin = async (req, res) => {
   const { phone, password } = req.body;
-  console.log(req.body)
   let doctor = await prisma.doctor.findUnique({ where: { phone } });
   if (!doctor) {
-    return res.status(404).json({ status: "Failed", message: "User not found" });
+    return res.status(404).json({ status: Status.FAILED, message: "User not found" });
   }
   const isPasswordValid = await bcrypt.compare(password, doctor.password);
   if (!isPasswordValid) {
-    return res.status(401).json({ status: "Failed", message: "Invalid credentials" });
+    return res.status(401).json({ status: Status.FAILED, message: "Invalid credentials" });
   }
 
   try {
     const token = jwt.sign({ phone }, process.env.JWT_SECRET, { expiresIn: "1h" });
-    return res.status(200).json({ status: "Success", message: "Login successful", token });
+    return res.status(200).json({ status: Status.SUCCESS, message: "Login successful", data: { token, id: doctor.id } });
   }
   catch (err) {
-    return res.status(500).json({ status: "Failed", message: "Internal server error" });
+    return res.status(500).json({ status: Status.ERROR, message: "Internal server error" });
   }
-
-
 };
 
-interface DoctorData {
-  id: string;
-  name: string;
-  imageUrl: string;
-  phone: string;
-  signatureUrl: string;
-  signatureFilename: string;
-  role: string;
-  password: string;
-}
-
-const uploadFileToSupabase = async (filename: string, buffer: File): Promise<any> => {
-  const { error } = await supabase.storage
-    .from(process.env.SUPABASE_BUCKET ?? "")
-    .upload(filename, buffer, { contentType: "image/png" });
-  const { data } = supabase.storage
-    .from(process.env.SUPABASE_BUCKET ?? "")
-    .getPublicUrl(filename);
-
-  if (error) console.log(error);
-  return data;
-};
-
-const handleFileUpload = async (req): Promise<DoctorData> => {
-  let { user } = req.body;
-  const filename = `${Date.now().toString()}-${req.file.originalname}`;
-  const data = await uploadFileToSupabase(filename, req.file.buffer);
-
-  user.signatureUrl = data.publicUrl;
-  user.signatureFilename = filename;
-  user.id = user.id || randomUUID();
-  return user;
-}
 
 export const handleDoctorRegister = async (req: Request, res: Response): Promise<Response<void>> => {
   if (typeof req.body.user === 'string') {
@@ -143,31 +101,23 @@ export const handleDoctorRegister = async (req: Request, res: Response): Promise
 
 };
 
-export const getDoctorWithRole = (req, res): void => {
-  const role = req.body.role;
-  db.select("*")
-    .from("doctor")
-    .where({ role, isAvailable: "1" })
-    .then((doctor) => {
-      res.status(200).send(doctor[0]); // return only one doctor
-    })
-    .catch((err) => {
-      res.status(400).send("Unable to get user");
-      console.error(err);
-    });
+export const getDoctorWithRole = async (req, res): Promise<Response<void>> => {
+  const role: string = req.body.role;
+  if (!role) {
+    return res.status(400).json({ status: Status.FAILED, message: "Role is required" });
+  }
+  const doctor = await prisma.doctor.findFirst({ where: { role } });
+  return res.status(200).json({status: Status.SUCCESS, data: {...doctor, password: undefined}});
 };
 
-export const getAvailableDoctors = (req, res): void => {
-  db.select("*")
-    .from("doctor")
-    .where({ isAvailable: "1" })
-    .then((doctor) => {
-      res.status(200).send(doctor);
-    })
-    .catch((err) => {
-      res.status(400).send("Unable to get user");
-      console.error(err);
-    });
+export const getAvailableDoctors = async (_req, res): Promise<Response<void>> => {
+  try {
+    const doctors = await prisma.doctor.findMany({ where: { isAvailable: true }, select: { id: true, name: true, role: true }});
+    return res.status(200).json({ status: Status.SUCCESS, data: doctors });
+  } catch (err) {
+    console.log(err)
+    return res.status(500).json({ status: Status.ERROR, message: err });
+  }
 };
 
 export const deleteDoctorWithID = async (req, res): Promise<void> => {
@@ -185,3 +135,15 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
   return res.json({ status: "Success", message: "Doctor deleted successfully", id: data.id });
 
 };
+
+
+const handleFileUpload = async (req): Promise<DoctorData> => {
+  let { user } = req.body;
+  const filename = `${Date.now().toString()}-${req.file.originalname}`;
+  const data = await uploadFileToSupabase(filename, req.file.buffer);
+
+  user.signatureUrl = data.publicUrl;
+  user.signatureFilename = filename;
+  user.id = user.id || randomUUID();
+  return user;
+}

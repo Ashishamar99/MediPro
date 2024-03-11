@@ -1,7 +1,7 @@
 // auth middleware
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import { Status } from '../enums/status';
+import { Status } from '../common/status';
 
 export const auth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.header('Authorization');
