@@ -29,6 +29,7 @@ model Doctor {
 model Patient {
   id          String        @id @default(uuid())
   name        String
+  gender      String
   phone       String        @unique
   imageUrl    String
   age         Int
