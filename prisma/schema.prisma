@@ -24,6 +24,7 @@ model Doctor {
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @default(now())
   Appointment       Appointment[]
+  Slot              Slot[]
 }
 
 model Patient {
@@ -47,9 +48,20 @@ model Appointment {
   patient_id String
   start_time DateTime
   end_time   DateTime
+  reason     String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now())
 
   @@index([doctor_id])
   @@index([patient_id])
+}
+
+model Slot {
+  id         String   @id @default(uuid())
+  doctor     Doctor   @relation(fields: [doctor_id], references: [id])
+  doctor_id  String
+  start_time DateTime
+  end_time   DateTime
+  status     String
+  @@index([doctor_id])
 }

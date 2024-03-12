@@ -96,6 +96,14 @@ export const getPatientsList = async (req, res): Promise<void> => {
   }
 };
 
+/**
+ * Get patient details by id
+ * @param req
+ * @param res
+ * @returns
+ * @name getPatientWithID
+ * @description Get patient details by id
+ */
 export const getPatientWithID = async (req, res): Promise<void> => {
   const id = req.params.id;
   try {
