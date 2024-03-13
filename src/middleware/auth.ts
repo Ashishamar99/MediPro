@@ -17,6 +17,7 @@ export const auth = (
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET ?? "");
+    // @ts-ignore
     req.user = decoded;
     next();
   } catch (error) {
