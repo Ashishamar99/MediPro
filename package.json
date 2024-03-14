@@ -18,7 +18,7 @@
     "zod": "^3.22.4"
   },
   "engines": {
-    "node": "19.8.1"
+    "node": "20.11.1"
   },
   "name": "medipro",
   "description": "This is a web app which can be used by doctors to automatically generate prescriptions by voice and send them as an SMS or a PDF. This can also be used by patients to store their previous prescriptions.",
@@ -28,7 +28,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "tsc --watch & nodemon dist/app.js",
     "start": "yarn build && node dist/app.js",
-    "build": "prisma generate && tsc",
+    "build": "prisma generate && tsc -p .",
     "lint": "eslint . --ext .ts"
   },
   "repository": {
