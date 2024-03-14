@@ -81,6 +81,7 @@ export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
       data: { token, id: doctor.id },
     });
   } catch (err) {
+    console.log(err);
     return res
       .status(500)
       .json({ status: Status.ERROR, message: err });
