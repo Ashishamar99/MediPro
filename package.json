@@ -2,7 +2,7 @@
   "dependencies": {
     "@prisma/client": "5.2.0",
     "@supabase/supabase-js": "^2.34.0",
-    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.17.1",
@@ -16,9 +16,6 @@
     "twilio": "^4.15.0",
     "winston": "^3.10.0",
     "zod": "^3.22.4"
-  },
-  "engines": {
-    "node": "20.11.1"
   },
   "name": "medipro",
   "description": "This is a web app which can be used by doctors to automatically generate prescriptions by voice and send them as an SMS or a PDF. This can also be used by patients to store their previous prescriptions.",

@@ -3,7 +3,7 @@ import prisma from "../database/prisma";
 import { type Request, type Response } from "express";
 import { randomUUID } from "crypto";
 import { Status } from "../common/status";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { type DoctorData } from "../common/types";
 import { doctorRegisterSchema } from "../schemas/doctor.schema";

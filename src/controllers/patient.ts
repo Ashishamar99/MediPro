@@ -1,6 +1,6 @@
 import { Status } from "../common/status";
 import prisma from "../database/prisma";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export const handlePatientRegister = async (req, res): Promise<void> => {
