@@ -83,7 +83,7 @@ export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
   } catch (err) {
     return res
       .status(500)
-      .json({ status: Status.ERROR, message: "Internal server error" });
+      .json({ status: Status.ERROR, message: err });
   }
 };
 
