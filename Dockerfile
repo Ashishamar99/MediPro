@@ -1,4 +1,5 @@
-FROM node:latest as builder
+ARG NODE_VERSION=20.11.1
+FROM node:${NODE_VERSION}-slim as builder
 
 WORKDIR /build
 COPY package*.json .
@@ -10,7 +11,7 @@ COPY src/ src/
 RUN yarn build
 
 
-FROM node:latest as runner
+FROM node:${NODE_VERSION}-slim as runner
 WORKDIR /app
 
 COPY --from=builder build/package*.json .
