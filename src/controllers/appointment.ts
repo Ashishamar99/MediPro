@@ -27,10 +27,10 @@ export const getAppointmentForDoctor = async (req, res): Promise<void> => {
       booking_time: moment(appointment.createdAt).format('MMM Do'),
       patient_name: appointment.patient.name,
       role: appointment.doctor.role,
-      end_time: moment(appointment.end_time).format('LT'),
-      id: appointment.id,
-      patient_id: appointment.patient_id,
-      start_time: moment(appointment.start_time).format('LT')
+      // end_time: moment(appointment.end_time).format('LT'),
+      // id: appointment.id,
+      // patient_id: appointment.patient_id,
+      // start_time: moment(appointment.start_time).format('LT')
     }))
 
     return res.json(data)

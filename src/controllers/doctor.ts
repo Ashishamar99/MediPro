@@ -139,22 +139,6 @@ export const getDoctorWithRole = async (req, res): Promise<Response<void>> => {
     .json({ status: Status.SUCCESS, data: { ...doctor, password: undefined } });
 };
 
-export const getAvailableDoctors = async (
-  _req,
-  res
-): Promise<Response<void>> => {
-  try {
-    const doctors = await prisma.doctor.findMany({
-      where: { isAvailable: true },
-      select: { id: true, phone: true, role: true },
-    });
-    return res.status(200).json({ status: Status.SUCCESS, data: doctors });
-  } catch (err) {
-    console.log(err);
-    return res.status(500).json({ status: Status.ERROR, message: err });
-  }
-};
-
 export const deleteDoctorWithID = async (req, res): Promise<void> => {
   const id = req.params.id;
   const doctor = await prisma.doctor.findUnique({

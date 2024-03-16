@@ -30,13 +30,13 @@ export const getAvailableSlots = async (req, res): Promise<void> => {
 }
 
 export const bookSlot = async (req, res): Promise<void> => {
-  let { doctorId, slotDate, startTime } = req.body;
+  let { doctorId, slotDate, slotNumber } = req.body;
   try {
     const existingSlot = await prisma.slot.findFirst({
       where: {
         doctorId,
         date: slotDate,
-        startTime,
+        slotNumber,
         status: 'available',
       },
     });
