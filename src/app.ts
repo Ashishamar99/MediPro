@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 
 import patientRouter from "./routes/patient";
 import doctorRouter from "./routes/doctor";
-import bookingRouter from "./routes/booking";
+import slotRouter from "./routes/slot";
 import consultationRouter from "./routes/consultation";
 import appointmentRouter from "./routes/appointment";
 
@@ -25,7 +25,7 @@ app.use("/patient", patientRouter);
 
 app.use("/doctor", doctorRouter);
 
-app.use("/booking", bookingRouter);
+app.use("/slot", slotRouter);
 
 app.use("/consultation", consultationRouter);
 

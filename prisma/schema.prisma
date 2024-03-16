@@ -2,8 +2,8 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 generator client {
-  provider = "prisma-client-js"
-  engineType = "binary"
+  provider      = "prisma-client-js"
+  engineType    = "binary"
   binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
 }
 
@@ -22,7 +22,6 @@ model Doctor {
   signatureFilename String
   role              String
   password          String
-  isAvailable       Boolean       @default(true)
   createdAt         DateTime      @default(now())
   updatedAt         DateTime      @default(now())
   Appointment       Appointment[]
@@ -42,28 +41,31 @@ model Patient {
   Appointment Appointment[]
 }
 
-model Appointment {
-  id         String   @id @default(uuid())
-  doctor     Doctor   @relation(fields: [doctor_id], references: [id])
-  patient    Patient  @relation(fields: [patient_id], references: [id])
-  doctor_id  String
-  patient_id String
-  start_time DateTime
-  end_time   DateTime
-  reason     String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @default(now())
-
-  @@index([doctor_id])
-  @@index([patient_id])
+model Slot {
+  id          String        @id @default(uuid())
+  slotNumber  Int           
+  doctorId    String
+  date        DateTime      @default(now()) @db.Date
+  startTime   DateTime
+  endTime     DateTime
+  status      String
+  doctor      Doctor        @relation(fields: [doctorId], references: [id])
+  Appointment Appointment[]
+  @@index([doctorId])
 }
 
-model Slot {
-  id         String   @id @default(uuid())
-  doctor     Doctor   @relation(fields: [doctor_id], references: [id])
-  doctor_id  String
-  start_time DateTime
-  end_time   DateTime
-  status     String
-  @@index([doctor_id])
+model Appointment {
+  id        String   @id @default(uuid())
+  doctor    Doctor   @relation(fields: [doctorId], references: [id])
+  patient   Patient  @relation(fields: [patientId], references: [id])
+  slot      Slot     @relation(fields: [slotId], references: [id])
+  doctorId  String
+  patientId String
+  slotId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([slotId])
 }
