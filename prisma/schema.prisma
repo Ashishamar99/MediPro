@@ -1,0 +1,69 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  engineType = "binary"
+  binaryTargets = ["native", "linux-musl-arm64-openssl-3.0.x"]
+}
+
+datasource db {
+  provider     = "postgres"
+  url          = env("DATABASE_URL")
+  relationMode = "prisma"
+}
+
+model Doctor {
+  id                String        @id @default(uuid())
+  name              String
+  phone             String        @unique
+  imageUrl          String
+  signatureUrl      String
+  signatureFilename String
+  role              String
+  password          String
+  isAvailable       Boolean       @default(true)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @default(now())
+  Appointment       Appointment[]
+  Slot              Slot[]
+}
+
+model Patient {
+  id          String        @id @default(uuid())
+  name        String
+  gender      String
+  phone       String        @unique
+  imageUrl    String
+  age         Int
+  password    String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @default(now())
+  Appointment Appointment[]
+}
+
+model Appointment {
+  id         String   @id @default(uuid())
+  doctor     Doctor   @relation(fields: [doctor_id], references: [id])
+  patient    Patient  @relation(fields: [patient_id], references: [id])
+  doctor_id  String
+  patient_id String
+  start_time DateTime
+  end_time   DateTime
+  reason     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+
+  @@index([doctor_id])
+  @@index([patient_id])
+}
+
+model Slot {
+  id         String   @id @default(uuid())
+  doctor     Doctor   @relation(fields: [doctor_id], references: [id])
+  doctor_id  String
+  start_time DateTime
+  end_time   DateTime
+  status     String
+  @@index([doctor_id])
+}
