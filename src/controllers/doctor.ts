@@ -152,11 +152,12 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
   await supabase.storage
     .from("medipro-signatures")
     .remove([doctor.signatureFilename]);
-  const data = await prisma.doctor.delete({ where: { id } });
+    //using raw query to delete as there is a bug in prisma delete
+  const data = await prisma.$queryRaw`DELETE FROM "Doctor" WHERE id = ${id}`;
   return res.json({
     status: "Success",
     message: "Doctor deleted successfully",
-    id: data.id,
+    id,
   });
 };
 
