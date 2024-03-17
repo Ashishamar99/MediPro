@@ -18,9 +18,6 @@ export const getAppointmentList = async (_req, res): Promise<void> => {
 }
 
 export const createAppointment = async (req, res): Promise<void> => {
-  // check patient is valid
-  // check if slot is already booked
-
   const { patientId, doctorId, slotNumber } = req.body
   try {
     const slot = await prisma.slot.findFirst({
@@ -147,9 +144,12 @@ export const cancelAppointment = async (req, res): Promise<void> => {
 export const getAppointmentWithID = async (req, res): Promise<void> => {
   const id = req.params.id
   try {
-    const appointments = await prisma.appointment.findMany({
+    const appointments = await prisma.appointment.findUnique({
       where: {
         id
+      },
+      include: {
+        slot: true
       }
     })
     return res.status(200).json({ status: Status.SUCCESS, data: appointments })
@@ -168,6 +168,9 @@ export const getAppointmentWithPID = async (req, res): Promise<void> => {
     const appointments = await prisma.appointment.findMany({
       where: {
         patientId: id
+      },
+      include: {
+        slot: true
       }
     })
     return res.status(200).json({ status: Status.SUCCESS, data: appointments })
@@ -186,6 +189,9 @@ export const getAppointmentWithDID = async (req, res): Promise<void> => {
     const appointments = await prisma.appointment.findMany({
       where: {
         doctorId: id
+      },
+      include: {
+        slot: true
       }
     })
     return res.status(200).json({ status: Status.SUCCESS, data: appointments })
