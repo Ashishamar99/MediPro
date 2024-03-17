@@ -11,6 +11,7 @@
     "moment": "^2.29.4",
     "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
+    "node-cron": "^3.0.3",
     "nodemon": "^3.0.1",
     "swagger-ui-express": "^5.0.0",
     "twilio": "^4.15.0",
@@ -26,6 +27,7 @@
     "dev": "tsc --watch & nodemon dist/app.js",
     "start": "yarn build && node dist/app.js",
     "build": "prisma generate && tsc -p .",
+    "vercel-build": "prisma generate",
     "lint": "eslint . --ext .ts"
   },
   "repository": {
