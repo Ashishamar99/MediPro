@@ -14,36 +14,38 @@ datasource db {
 }
 
 model Doctor {
-  id                String        @id @default(uuid())
+  id                String         @id @default(uuid())
   name              String
-  phone             String        @unique
+  phone             String         @unique
   imageUrl          String
   signatureUrl      String
   signatureFilename String
   role              String
   password          String
-  createdAt         DateTime      @default(now())
-  updatedAt         DateTime      @default(now())
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @default(now())
   Appointment       Appointment[]
   Slot              Slot[]
+  Consultation      Consultation[]
 }
 
 model Patient {
-  id          String        @id @default(uuid())
-  name        String
-  gender      String
-  phone       String        @unique
-  imageUrl    String
-  age         Int
-  password    String
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @default(now())
-  Appointment Appointment[]
+  id           String         @id @default(uuid())
+  name         String
+  gender       String
+  phone        String         @unique
+  imageUrl     String
+  age          Int
+  password     String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now())
+  Appointment  Appointment[]
+  Consultation Consultation[]
 }
 
 model Slot {
   id          String        @id @default(uuid())
-  slotNumber  Int           
+  slotNumber  Int
   doctorId    String
   date        DateTime      @default(now()) @db.Date
   startTime   DateTime
@@ -51,21 +53,40 @@ model Slot {
   status      String
   doctor      Doctor        @relation(fields: [doctorId], references: [id])
   Appointment Appointment[]
+
   @@index([doctorId])
 }
 
 model Appointment {
-  id        String   @id @default(uuid())
-  doctor    Doctor   @relation(fields: [doctorId], references: [id])
-  patient   Patient  @relation(fields: [patientId], references: [id])
-  slot      Slot     @relation(fields: [slotId], references: [id])
-  doctorId  String
-  patientId String
-  slotId    String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
+  id           String         @id @default(uuid())
+  doctor       Doctor         @relation(fields: [doctorId], references: [id])
+  patient      Patient        @relation(fields: [patientId], references: [id])
+  slot         Slot           @relation(fields: [slotId], references: [id])
+  consultation Consultation[]
+  doctorId     String
+  patientId    String
+  slotId       String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now())
 
   @@index([doctorId])
   @@index([patientId])
   @@index([slotId])
+}
+
+model Consultation {
+  id                   String      @id @default(uuid())
+  doctor               Doctor      @relation(fields: [doctorId], references: [id])
+  patient              Patient     @relation(fields: [patientId], references: [id])
+  appointment          Appointment @relation(fields: [appointmentId], references: [id])
+  doctorId             String
+  patientId            String
+  appointmentId        String
+  prescriptionUrl      String
+  prescriptionFilename String
+  audio                String
+
+  @@index([doctorId])
+  @@index([patientId])
+  @@index([appointmentId])
 }

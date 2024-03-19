@@ -1,5 +1,4 @@
-import { createClient } from "@supabase/supabase-js";
-import prisma from "../database/prisma";
+import prisma from "../config/prisma";
 import { type Request, type Response } from "express";
 import { randomUUID } from "crypto";
 import { Status } from "../common/status";
@@ -7,11 +6,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { type DoctorData } from "../common/types";
 import { doctorRegisterSchema } from "../schemas/doctor.schema";
-import { uploadFileToSupabase } from "../common/helper";
-
-const supabaseUrl = process.env.SUPABASE_URL ?? "";
-const supabaseKey = process.env.SUPABASE_KEY ?? "";
-const supabase = createClient(supabaseUrl, supabaseKey);
+import supabase from "../config/supabase";
 
 export const getDoctorsList = async (
   _req: Request,
@@ -57,6 +52,7 @@ export const getDoctorWithID = async (
  * @returns  Response
  */
 export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
+  console.log(process.env.DATABASE_URL);
   const { phone, password } = req.body;
   const doctor = await prisma.doctor.findUnique({ where: { phone } });
   if (!doctor) {
@@ -82,9 +78,7 @@ export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
     });
   } catch (err) {
     console.log(err);
-    return res
-      .status(500)
-      .json({ status: Status.ERROR, message: err });
+    return res.status(500).json({ status: Status.ERROR, message: err });
   }
 };
 
@@ -112,7 +106,10 @@ export const handleDoctorRegister = async (
         .status(400)
         .json({ status: Status.FAILED, message: "User already exists" });
     }
-    doctor = await handleFileUpload({ file: req.file, body: req.body });
+    doctor = await handleSignatureFileUpload({
+      file: req.file,
+      body: req.body,
+    });
     doctor.password = await bcrypt.hash(doctor.password, 10);
     const response = await prisma.doctor.create({ data: doctor });
     return res.status(201).json({
@@ -152,7 +149,7 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
   await supabase.storage
     .from("medipro-signatures")
     .remove([doctor.signatureFilename]);
-    //using raw query to delete as there is a bug in prisma delete
+  //using raw query to delete as there is a bug in prisma delete on cascade
   const data = await prisma.$queryRaw`DELETE FROM "Doctor" WHERE id = ${id}`;
   return res.json({
     status: "Success",
@@ -161,13 +158,22 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
   });
 };
 
-const handleFileUpload = async (req): Promise<DoctorData> => {
+const handleSignatureFileUpload = async (req): Promise<DoctorData> => {
   const { user } = req.body;
   const filename = `${Date.now().toString()}-${req.file.originalname}`;
-  const data = await uploadFileToSupabase(filename, req.file.buffer);
+  const bucket = process.env.SUPABASE_SIGNATURES_BUCKET ?? "misc";
+  try {
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(filename, req.file.buffer, { contentType: "image/png" });
+    if (error) throw error;
+    const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
 
-  user.signatureUrl = data.publicUrl;
-  user.signatureFilename = filename;
-  user.id = user.id || randomUUID();
-  return user;
+    user.signatureUrl = data.publicUrl;
+    user.signatureFilename = filename;
+    user.id = user.id || randomUUID();
+    return user;
+  } catch (err) {
+    return err;
+  }
 };

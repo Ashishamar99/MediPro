@@ -21,10 +21,10 @@
   "name": "medipro",
   "description": "This is a web app which can be used by doctors to automatically generate prescriptions by voice and send them as an SMS or a PDF. This can also be used by patients to store their previous prescriptions.",
   "version": "1.0.0",
-  "main": "dist/app.js",
+  "main": "dist/src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc --watch & nodemon dist/app.js",
+    "dev": "tsc --watch & nodemon dist/src/app.js",
     "start": "yarn build && node dist/app.js",
     "build": "prisma generate && tsc -p .",
     "vercel-build": "prisma generate",

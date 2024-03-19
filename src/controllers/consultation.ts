@@ -1,120 +1,129 @@
-import db from '../database/knex'
+import { Status } from "../common/status";
+import prisma from "../config/prisma";
+import supabase from "../config/supabase";
 
-export const getConsultationList = (req, res): void => {
-  db.select('*')
-    .from('consultations')
-    .then((consultations) => {
-      res.status(200).send(consultations)
-    })
-    .catch((err) => {
-      res.send('Unable to get consultation details')
-      console.error(err)
-    })
-}
+export const getConsultationList = async (req, res): Promise<void> => {
+  try {
+    const data = await prisma.consultation.findMany();
+    return res.status(200).json({
+      status: Status.SUCCESS,
+      data,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: Status.ERROR,
+      message: err.message,
+    });
+  }
+};
 
-export const getConsultationWithID = (req, res): void => {
-  const cid = req.params.id
-  db.select('*')
-    .from('consultations')
-    .where('cid', '=', cid)
-    .then((consultations) => {
-      res.status(200).send(consultations)
-    })
-    .catch((err) => {
-      res.send('Unable to get consultation details')
-      console.error(err)
-    })
-}
+export const getConsultationWithID = async (req, res): Promise<void> => {
+  const id = req.params.id;
+  try {
+    const data = await prisma.consultation.findUnique({ where: { id } });
+    return res.status(200).json({
+      status: Status.SUCCESS,
+      data,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: Status.ERROR,
+      message: err.message,
+    });
+  }
+};
 
-export const getPatientConsultation = (req, res): void => {
-  const pid = req.params.id
-  db.select('*')
-    .from('consultations')
-    .where('pid', '=', pid)
-    .then((consultations) => {
-      consultations.forEach((consultation) => {
-        if ((consultation?.pdf as string) !== undefined) {
-          consultation.pdf = consultation.pdf.toString()
-        }
-      })
-      res.status(200).send(consultations)
-    })
-    .catch((err) => {
-      res.send('Unable to get consultation details')
-      console.error(err)
-    })
-}
+export const getPatientConsultation = async (req, res): Promise<void> => {
+  const id = req.params.id;
 
-export const getDoctorConsultation = (req, res): void => {
-  const did = req.params.id
-  db.select('*')
-    .from('consultations')
-    .where('did', '=', did)
-    .then((consultations) => {
-      consultations.forEach((consultation) => {
-        if ((consultation?.pdf as string) !== undefined) {
-          consultation.pdf = consultation.pdf.toString()
-        }
-      })
-      res.status(200).send(consultations)
-    })
-    .catch((err) => {
-      res.send('Unable to get consultation details')
-      console.error(err)
-    })
-}
+  try {
+    const data = await prisma.consultation.findMany({
+      where: { patientId: id },
+    });
+    return res.status(200).json({
+      status: Status.SUCCESS,
+      data,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: Status.ERROR,
+      message: err.message,
+    });
+  }
+};
 
-export const addConsultationInfo = (req, res): void => {
-  const speechData = req.body.audio
-  let formattedSpeechData = ''
-  formattedSpeechData += `Diagnosing for, ${speechData.diagnosis}.`
-  const medicine = speechData.medicineData.join('\n')
-  formattedSpeechData += ` Medicines prescribed, ${medicine}\n`
-  formattedSpeechData += speechData.advice.length as boolean
+export const getDoctorConsultation = async (req, res): Promise<void> => {
+  const id = req.params.id;
+
+  try {
+    const data = await prisma.consultation.findMany({
+      where: { doctorId: id },
+    });
+    return res.status(200).json({
+      status: Status.SUCCESS,
+      data,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      status: Status.ERROR,
+      message: err.message,
+    });
+  }
+};
+
+export const addConsultationInfo = async (req, res): Promise<void> => {
+  const payload = req.body;
+
+  try {
+    const appointment = await prisma.appointment.findUnique({
+      where: {
+        id: req.body.appointmentId,
+        patientId: payload.patientId,
+        doctorId: payload.doctorId,
+      },
+    });
+    if (!appointment) {
+      return res
+        .status(404)
+        .json({ status: Status.FAILED, message: "Appointment not found" });
+    }
+    const prescription = handlePrescriptionFileUpload(req);
+    req.body.audio = getFormattedSpeechData(payload.audio);
+    req.body = { ...req.body, ...prescription };
+
+    const data = await prisma.consultation.create({
+      data: payload,
+    });
+
+    return res.status(201).json({ status: Status.SUCCESS, data });
+  } catch (err) {
+    return res.status(500).json({ status: Status.ERROR, message: err.message });
+  }
+};
+
+const getFormattedSpeechData = (speechData): String => {
+  const medicine = speechData.medicineData.join("\n");
+
+  let formattedSpeechData = `Diagnosing for, ${speechData.diagnosis}.`;
+  formattedSpeechData += ` Medicines prescribed, ${medicine}\n`;
+  formattedSpeechData += (speechData.advice.length as boolean)
     ? `Advice, ${speechData.advice}`
-    : ''
-  req.body.audio = formattedSpeechData
-  db.transaction(async function (trx) {
-    const consultationInfo = req.body
-    await trx
-      .insert(consultationInfo)
-      .into('consultations')
-      .then((id) => {
-        // trx.commit
-        // db.select("pphno")
-        //   .from("patient")
-        //   .where("pid", "=", consultationInfo.pid)
-        //   .then((pphno) => {
-        //     console.log(pphno[0].pphno, consultationInfo.pid);
-        //     //SendSMS
-        //     var patientPhoneNumber = String(pphno[0].pphno);
+    : "";
+  return formattedSpeechData;
+};
 
-        //     //Removing +91 from phone number
-        //     if (patientPhoneNumber.startsWith("+91")) {
-        //       patientPhoneNumber = patientPhoneNumber.slice(3);
-        //     }
-        //     let SMSmessage = formattedSpeechData;
-        //     console.log(SMSmessage.length);
-        //     if (formattedSpeechData.length < 190) {
-        //       sendSMS(SMSmessage, patientPhoneNumber);
-        //     } else {
-        //       SMSmessage = `Your audio prescription is generated for  ${speechData.diagnosis}, please call IVR service to listen to it`;
-        //       sendSMS(SMSmessage, patientPhoneNumber);
-        //     }
-        //   })
-        //   .catch((err) => {
-        //     res.status(400).send("Unable to get user");
-        //     console.error(err);
-        //   });
-        res.status(200).send(id)
-      })
-      .catch((err) => {
-        // trx.rollback
-        res.status(500).send("Couldn't complete consultation")
-        console.error(err)
-      })
-  }).catch(function (err) {
-    res.status(400).send('unable to complete consultation')
-    console.error(err)
-  })
-}
+const handlePrescriptionFileUpload = async (req) => {
+  const filename = `${Date.now().toString()}-${req.file.originalname}`;
+  const bucket = process.env.SUPABASE_PRESCRIPTIONS_BUCKET ?? "misc";
+  try {
+    const { error } = await supabase.storage
+      .from(bucket)
+      .upload(filename, req.file.buffer, { contentType: "application/pdf" });
+    if (error) throw error;
+    const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
+
+    return { prescriptionUrl: data.publicUrl, prescriptionFilename: filename };
+  } catch (err) {
+    return err;
+  }
+};

@@ -1,52 +1,58 @@
-import prisma from '../database/prisma'
-import { Status } from '../common/status'
+import prisma from "../config/prisma";
+import { Status } from "../common/status";
 
 export const getAppointmentList = async (_req, res): Promise<void> => {
   try {
     return res.json({
-      status: Status.SUCCESS, data: await prisma.appointment.findMany({
+      status: Status.SUCCESS,
+      data: await prisma.appointment.findMany({
         include: {
-          slot: true
-        }
-      })
-    })
+          slot: true,
+        },
+      }),
+    });
   } catch (err) {
-    console.error(err)
-    return res.status(500).json({ status: Status.ERROR, message: err })
+    console.error(err);
+    return res.status(500).json({ status: Status.ERROR, message: err });
   }
-
-}
+};
 
 export const createAppointment = async (req, res): Promise<void> => {
-  const { patientId, doctorId, slotNumber } = req.body
+  const { patientId, doctorId, slotNumber } = req.body;
   try {
     const slot = await prisma.slot.findFirst({
       where: {
         slotNumber,
-        doctorId
+        doctorId,
       },
       select: {
         id: true,
-        status: true
-      }
+        status: true,
+      },
     });
 
-    if (!slot || slot.status === 'booked') {
-      return res.status(404).json({ status: Status.FAILED, message: 'Slot not found' })
+    if (!slot || slot.status === "booked") {
+      return res
+        .status(404)
+        .json({ status: Status.FAILED, message: "Slot not found" });
     }
 
     const patient = await prisma.patient.findFirst({
       where: {
-        id: patientId
-      }
-    })
+        id: patientId,
+      },
+    });
 
     if (!slot) {
-      return res.status(404).json({ status: Status.FAILED, message: 'Slot not found' })
+      return res
+        .status(404)
+        .json({ status: Status.FAILED, message: "Slot not found" });
     }
 
     if (!patient) {
-      return res.status(404).json({ status: Status.FAILED, message: 'Patient not found' })
+      return res
+        .status(404)
+        .json({ status: Status.FAILED, message: "Patient not found" });
     }
 
     const data = await prisma.$transaction(async (trx) => {
@@ -57,13 +63,13 @@ export const createAppointment = async (req, res): Promise<void> => {
           doctorId,
         },
         data: {
-          status: 'booked'
+          status: "booked",
         },
       });
 
-      if (!result || result.status !== 'booked') {
-        console.log(result)
-        throw new Error('Slot not available or does not exist');
+      if (!result || result.status !== "booked") {
+        console.log(result);
+        throw new Error("Slot not available or does not exist");
       }
 
       const appointment = await trx.appointment.create({
@@ -71,21 +77,27 @@ export const createAppointment = async (req, res): Promise<void> => {
           patientId,
           doctorId,
           slotId: slot.id,
-        }
-      })
+        },
+      });
 
-      return { ...appointment, slot: result }
-    })
+      return { ...appointment, slot: result };
+    });
 
-    return res.status(201).json({ status: Status.SUCCESS, message: 'Appointment created successfully', data })
+    return res
+      .status(201)
+      .json({
+        status: Status.SUCCESS,
+        message: "Appointment created successfully",
+        data,
+      });
   } catch (err) {
-    console.log(err)
-    return res.status(500).json({ status: Status.ERROR, message: err.message })
+    console.log(err);
+    return res.status(500).json({ status: Status.ERROR, message: err.message });
   }
-}
+};
 
 export const cancelAppointment = async (req, res): Promise<void> => {
-  const { id, slotNumber, doctorId } = req.body
+  const { id, slotNumber, doctorId } = req.body;
 
   try {
     const existingAppointment = await prisma.appointment.findFirst({
@@ -96,110 +108,108 @@ export const cancelAppointment = async (req, res): Promise<void> => {
         slot: {
           select: {
             id: true,
-          }
-        }
-      }
-    })
+          },
+        },
+      },
+    });
 
     if (!existingAppointment) {
-      return res.status(404).json({ status: Status.FAILED, message: 'Appointment not found' })
+      return res
+        .status(404)
+        .json({ status: Status.FAILED, message: "Appointment not found" });
     }
-
 
     const result = await prisma.$transaction(async (trx) => {
       const appointment = await trx.appointment.delete({
         where: {
-          id
-        }
+          id,
+        },
       });
 
-      if (!appointment) throw new Error('Appointment not found');
+      if (!appointment) throw new Error("Appointment not found");
 
       const result = await trx.slot.update({
         where: {
           id: existingAppointment.slot.id,
           slotNumber,
-          doctorId
+          doctorId,
         },
         data: {
-          status: 'available'
+          status: "available",
         },
       });
-      return { slot: { id: result.id }, appointment: { id: appointment.id } }
-    })
+      return { slot: { id: result.id }, appointment: { id: appointment.id } };
+    });
 
     if (!result) {
-      return res.status(404).json({ status: Status.FAILED, message: 'Slot not found' })
+      return res
+        .status(404)
+        .json({ status: Status.FAILED, message: "Slot not found" });
     }
 
-    return res.status(200).json({ status: Status.SUCCESS, message: 'Appointment cancelled successfully', data: result })
-
+    return res
+      .status(200)
+      .json({
+        status: Status.SUCCESS,
+        message: "Appointment cancelled successfully",
+        data: result,
+      });
   } catch (err) {
-    console.error(err)
-    return res.status(500).json({ status: Status.ERROR, message: err })
+    console.error(err);
+    return res.status(500).json({ status: Status.ERROR, message: err });
   }
-
-}
+};
 
 export const getAppointmentWithID = async (req, res): Promise<void> => {
-  const id = req.params.id
+  const id = req.params.id;
   try {
     const appointments = await prisma.appointment.findUnique({
       where: {
-        id
+        id,
       },
       include: {
-        slot: true
-      }
-    })
-    return res.status(200).json({ status: Status.SUCCESS, data: appointments })
-
+        slot: true,
+      },
+    });
+    return res.status(200).json({ status: Status.SUCCESS, data: appointments });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: Status.ERROR, message: err });
   }
-  catch (err) {
-    console.error(err)
-    return res.status(500).json({ status: Status.ERROR, message: err })
-  }
-
-}
+};
 
 export const getAppointmentWithPID = async (req, res): Promise<void> => {
-  const id = req.params.id
+  const id = req.params.id;
   try {
     const appointments = await prisma.appointment.findMany({
       where: {
-        patientId: id
+        patientId: id,
       },
       include: {
-        slot: true
-      }
-    })
-    return res.status(200).json({ status: Status.SUCCESS, data: appointments })
-
+        slot: true,
+      },
+    });
+    return res.status(200).json({ status: Status.SUCCESS, data: appointments });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: Status.ERROR, message: err });
   }
-  catch (err) {
-    console.error(err)
-    return res.status(500).json({ status: Status.ERROR, message: err })
-  }
-
-}
+};
 
 export const getAppointmentWithDID = async (req, res): Promise<void> => {
-  const id = req.params.id
+  const id = req.params.id;
   try {
     const appointments = await prisma.appointment.findMany({
       where: {
-        doctorId: id
+        doctorId: id,
       },
       include: {
-        slot: true
-      }
-    })
-    return res.status(200).json({ status: Status.SUCCESS, data: appointments })
-
+        slot: true,
+      },
+    });
+    return res.status(200).json({ status: Status.SUCCESS, data: appointments });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: Status.ERROR, message: err });
   }
-  catch (err) {
-    console.error(err)
-    return res.status(500).json({ status: Status.ERROR, message: err })
-  }
-
-}
+};
