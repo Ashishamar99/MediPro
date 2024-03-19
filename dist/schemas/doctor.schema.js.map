@@ -1,0 +1,1 @@
+{"version":3,"file":"doctor.schema.js","sourceRoot":"","sources":["../../src/schemas/doctor.schema.ts"],"names":[],"mappings":";;;AAAA,6BAAwB;AACxB,+CAA2C;AAE9B,QAAA,oBAAoB,GAAG,OAAC,CAAC,MAAM,CAAC;IAC3C,IAAI,EAAE,OAAC;SACJ,GAAG,EAAE;SACL,MAAM,CAAC,CAAC,IAAI,EAAE,EAAE,CAAC,OAAO,IAAI,KAAK,OAAO,IAAI,EAAE,kBAAkB,CAAC;IACpE,IAAI,EAAE,wBAAU;CACjB,CAAC,CAAC"}
