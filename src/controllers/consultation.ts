@@ -65,7 +65,7 @@ export const getDoctorConsultation = (req, res): void => {
 }
 
 export const addConsultationInfo = (req, res): void => {
-  const speechData = req.body.audio
+  const speechData = req.body.prescription.audio
   let formattedSpeechData = ''
   formattedSpeechData += `Diagnosing for, ${speechData.diagnosis}.`
   const medicine = speechData.medicineData.join('\n')
@@ -73,9 +73,9 @@ export const addConsultationInfo = (req, res): void => {
   formattedSpeechData += speechData.advice.length as boolean
     ? `Advice, ${speechData.advice}`
     : ''
-  req.body.audio = formattedSpeechData
+  req.body.prescription.audio = formattedSpeechData
   db.transaction(async function (trx) {
-    const consultationInfo = req.body
+    const consultationInfo = req.body.prescription
     await trx
       .insert(consultationInfo)
       .into('consultations')
