@@ -5,11 +5,12 @@ import dotenv from "dotenv";
 
 import patientRouter from "./routes/patient";
 import doctorRouter from "./routes/doctor";
-import bookingRouter from "./routes/booking";
+import slotRouter from "./routes/slot";
 import consultationRouter from "./routes/consultation";
 import appointmentRouter from "./routes/appointment";
 
 import logger from "./logger";
+
 dotenv.config();
 const app = express();
 const port = process.env.PORT ?? 5002;
@@ -21,16 +22,18 @@ app.get("/health", (_req, res) => {
   res.json({ uptime: process.uptime(), message: "OK", timestamp: new Date() });
 });
 
-app.use("/patient", patientRouter);
+app.use("/api/patient", patientRouter);
 
-app.use("/doctor", doctorRouter);
+app.use("/api/doctor", doctorRouter);
 
-app.use("/booking", bookingRouter);
+app.use("/api/slot", slotRouter);
 
-app.use("/consultation", consultationRouter);
+app.use("/api/consultation", consultationRouter);
 
-app.use("/appointment", appointmentRouter);
+app.use("/api/appointment", appointmentRouter);
 
 app.listen(port, () => {
   logger.info(`Application started at port ${port}`);
 });
+
+export default app;

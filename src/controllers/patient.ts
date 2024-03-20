@@ -1,5 +1,5 @@
 import { Status } from "../common/status";
-import prisma from "../database/prisma";
+import prisma from "../config/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 

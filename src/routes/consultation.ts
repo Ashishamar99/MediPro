@@ -1,6 +1,8 @@
 import express from 'express'
 import * as consultationController from '../controllers/consultation'
+import multer from 'multer';
 const router = express.Router()
+const upload = multer({ storage: multer.memoryStorage()});
 
 router.get('/', (req, res) => {
   consultationController.getConsultationList(req, res)
@@ -15,7 +17,7 @@ router.get('/patient/:id', (req, res) => {
 router.get('/doctor/:id', (req, res) => {
   consultationController.getDoctorConsultation(req, res)
 })
-router.post('/', (req, res) => {
+router.post('/', upload.single("prescription"), (req, res) => {
   consultationController.addConsultationInfo(req, res)
 })
 

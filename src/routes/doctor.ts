@@ -12,10 +12,6 @@ router.get("/", (req, res) => {
   void doctorController.getDoctorsList(req, res);
 });
 
-router.get("/get-available-doctors", auth, (req, res) => {
-  void doctorController.getAvailableDoctors(req, res);
-});
-
 router.get("/:id", auth, (req, res) => {
   void doctorController.getDoctorWithID(req, res);
 });

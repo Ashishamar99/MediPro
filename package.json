@@ -7,10 +7,10 @@
     "dotenv": "^16.3.1",
     "express": "^4.17.1",
     "install": "^0.13.0",
-    "knex": "^2.5.1",
     "moment": "^2.29.4",
     "multer": "^1.4.5-lts.1",
     "mysql": "^2.18.1",
+    "node-cron": "^3.0.3",
     "nodemon": "^3.0.1",
     "swagger-ui-express": "^5.0.0",
     "twilio": "^4.15.0",
@@ -20,12 +20,13 @@
   "name": "medipro",
   "description": "This is a web app which can be used by doctors to automatically generate prescriptions by voice and send them as an SMS or a PDF. This can also be used by patients to store their previous prescriptions.",
   "version": "1.0.0",
-  "main": "dist/app.js",
+  "main": "dist/src/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "tsc --watch & nodemon dist/app.js",
+    "dev": "tsc --watch & nodemon dist/src/app.js",
     "start": "yarn build && node dist/app.js",
     "build": "prisma generate && tsc -p .",
+    "vercel-build": "prisma generate",
     "lint": "eslint . --ext .ts"
   },
   "repository": {
