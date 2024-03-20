@@ -72,12 +72,11 @@ export const getDoctorConsultation = async (req, res): Promise<void> => {
 };
 
 export const addConsultationInfo = async (req, res): Promise<void> => {
-  const payload = req.body;
-
+  let payload = JSON.parse(req.body.prescription);
   try {
     const appointment = await prisma.appointment.findUnique({
       where: {
-        id: req.body.appointmentId,
+        id: payload.appointmentId,
         patientId: payload.patientId,
         doctorId: payload.doctorId,
       },
@@ -87,10 +86,9 @@ export const addConsultationInfo = async (req, res): Promise<void> => {
         .status(404)
         .json({ status: Status.FAILED, message: "Appointment not found" });
     }
-    const prescription = handlePrescriptionFileUpload(req);
-    req.body.audio = getFormattedSpeechData(payload.audio);
-    req.body = { ...req.body, ...prescription };
-
+    const prescription = await handlePrescriptionFileUpload(req);
+    payload.audio = getFormattedSpeechData(payload.audio);
+    payload = { ...payload, ...prescription };
     const data = await prisma.consultation.create({
       data: payload,
     });
@@ -105,7 +103,7 @@ const getFormattedSpeechData = (speechData): String => {
   const medicine = speechData.medicineData.join("\n");
 
   let formattedSpeechData = `Diagnosing for, ${speechData.diagnosis}.`;
-  formattedSpeechData += ` Medicines prescribed, ${medicine}\n`;
+  formattedSpeechData += ` Medicines prescribed, ${medicine}. `;
   formattedSpeechData += (speechData.advice.length as boolean)
     ? `Advice, ${speechData.advice}`
     : "";
