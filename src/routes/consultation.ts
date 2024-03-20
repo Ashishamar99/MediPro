@@ -17,7 +17,7 @@ router.get('/patient/:id', (req, res) => {
 router.get('/doctor/:id', (req, res) => {
   consultationController.getDoctorConsultation(req, res)
 })
-router.post('/', upload.single("prescriptions"), (req, res) => {
+router.post('/', upload.single("prescription"), (req, res) => {
   consultationController.addConsultationInfo(req, res)
 })
 
