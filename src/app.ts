@@ -3,13 +3,8 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 
-import patientRouter from "./routes/patient";
-import doctorRouter from "./routes/doctor";
-import slotRouter from "./routes/slot";
-import consultationRouter from "./routes/consultation";
-import appointmentRouter from "./routes/appointment";
-
 import logger from "./logger";
+import router from "./routes";
 
 dotenv.config();
 const app = express();
@@ -22,15 +17,8 @@ app.get("/health", (_req, res) => {
   res.json({ uptime: process.uptime(), message: "OK", timestamp: new Date() });
 });
 
-app.use("/api/patient", patientRouter);
+app.use("/api", router)
 
-app.use("/api/doctor", doctorRouter);
-
-app.use("/api/slot", slotRouter);
-
-app.use("/api/consultation", consultationRouter);
-
-app.use("/api/appointment", appointmentRouter);
 
 app.listen(port, () => {
   logger.info(`Application started at port ${port}`);
