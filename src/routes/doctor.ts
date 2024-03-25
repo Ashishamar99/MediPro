@@ -8,7 +8,7 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-router.get("/", (req, res) => {
+router.get("/", auth, (req, res) => {
   void doctorController.getDoctorsList(req, res);
 });
 

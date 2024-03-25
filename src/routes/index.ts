@@ -4,6 +4,7 @@ import doctorRouter from './doctor';
 import slotRouter from './slot';
 import consultationRouter from './consultation';
 import appointmentRouter from './appointment';
+import { auth } from '../middleware/auth';
 
 const router = express.Router();
 
@@ -11,10 +12,10 @@ router.use("/patient", patientRouter);
 
 router.use("/doctor", doctorRouter);
 
-router.use("/slot", slotRouter);
+router.use("/slot", auth, slotRouter);
 
-router.use("/consultation", consultationRouter);
+router.use("/consultation", auth, consultationRouter);
 
-router.use("/appointment", appointmentRouter);
+router.use("/appointment", auth, appointmentRouter);
 
 export default router;

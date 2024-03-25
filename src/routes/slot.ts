@@ -1,17 +1,16 @@
 import express from 'express'
 import * as bookingController from '../controllers/slot'
-import { auth } from '../middleware/auth'
 const router = express.Router()
 
-router.get('/', auth, (req, res) => {
+router.get('/', (req, res) => {
   bookingController.getSlots(req, res)
 })
 
-router.get('/available', auth, (req, res) => {
+router.get('/available', (req, res) => {
   bookingController.getAvailableSlots(req, res)
 })
 
-router.post('/book', auth, (req, res) => {
+router.post('/book', (req, res) => {
   bookingController.bookSlot(req, res)
 })
 
