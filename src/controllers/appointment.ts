@@ -68,7 +68,6 @@ export const createAppointment = async (req, res): Promise<void> => {
       });
 
       if (!result || result.status !== "booked") {
-        console.log(result);
         throw new Error("Slot not available or does not exist");
       }
 

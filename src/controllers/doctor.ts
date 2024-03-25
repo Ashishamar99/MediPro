@@ -52,7 +52,6 @@ export const getDoctorWithID = async (
  * @returns  Response
  */
 export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
-  console.log(process.env.DATABASE_URL);
   const { phone, password } = req.body;
   const doctor = await prisma.doctor.findUnique({ where: { phone } });
   if (!doctor) {
