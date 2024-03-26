@@ -203,7 +203,12 @@ export const getAppointmentWithDID = async (req, res): Promise<void> => {
         doctorId: id,
       },
       include: {
-        slot: true,
+        patient: true,
+        slot: {
+          select: {
+            slotNumber: true
+          }
+        },
       },
     });
     return res.status(200).json({ status: Status.SUCCESS, data: appointments });
