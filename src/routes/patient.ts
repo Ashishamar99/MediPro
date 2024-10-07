@@ -4,7 +4,7 @@ import * as patientController from "../controllers/patient";
 import { auth } from "../middleware/auth";
 const router = express.Router();
 
-router.get("/", (req, res) => {
+router.get("/", auth, (req, res) => {
   void patientController.getPatientsList(req, res);
 });
 

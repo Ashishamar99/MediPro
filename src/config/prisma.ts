@@ -1,28 +1,42 @@
 // prismaSingleton.ts
 
-import { PrismaClient } from '@prisma/client'
+import { PrismaClient } from "@prisma/client";
+import logger from "../logger";
 
 class PrismaSingleton {
-  private readonly prisma: PrismaClient
+  private readonly prisma: PrismaClient;
 
-  private static instance: PrismaSingleton | null = null
+  private static instance: PrismaSingleton | null = null;
 
-  private constructor () {
-    this.prisma = new PrismaClient()
+  private constructor() {
+    this.prisma = new PrismaClient();
   }
 
-  public static getInstance (): PrismaSingleton {
+  public static getInstance(): PrismaSingleton {
     if (!PrismaSingleton.instance) {
-      PrismaSingleton.instance = new PrismaSingleton()
+      PrismaSingleton.instance = new PrismaSingleton();
     }
-    return PrismaSingleton.instance
+    return PrismaSingleton.instance;
   }
 
-  public getPrisma (): PrismaClient {
-    return this.prisma
+  public getPrisma(): PrismaClient {
+    return this.prisma;
+  }
+
+  public async checkDbConnection() {
+    try {
+      await this.prisma.$connect();
+      logger.info("Database connection established successfully.");
+    } catch (error) {
+      logger.error("Failed to connect to the database:", error);
+      process.exit(1); 
+    } finally {
+      await this.prisma.$disconnect();
+    }
   }
 }
 
-const prismaInstance = PrismaSingleton.getInstance()
+const prismaInstance = PrismaSingleton.getInstance();
+prismaInstance.checkDbConnection();
 
-export default prismaInstance.getPrisma()
+export default prismaInstance.getPrisma();

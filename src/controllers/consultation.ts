@@ -58,6 +58,13 @@ export const getDoctorConsultation = async (req, res): Promise<void> => {
   try {
     const data = await prisma.consultation.findMany({
       where: { doctorId: id },
+      include: {
+        patient: {
+          select: {
+            name: true,
+          }
+        }
+      }
     });
     return res.status(200).json({
       status: Status.SUCCESS,

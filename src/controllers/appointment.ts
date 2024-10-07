@@ -68,7 +68,6 @@ export const createAppointment = async (req, res): Promise<void> => {
       });
 
       if (!result || result.status !== "booked") {
-        console.log(result);
         throw new Error("Slot not available or does not exist");
       }
 
@@ -204,7 +203,12 @@ export const getAppointmentWithDID = async (req, res): Promise<void> => {
         doctorId: id,
       },
       include: {
-        slot: true,
+        patient: true,
+        slot: {
+          select: {
+            slotNumber: true
+          }
+        },
       },
     });
     return res.status(200).json({ status: Status.SUCCESS, data: appointments });

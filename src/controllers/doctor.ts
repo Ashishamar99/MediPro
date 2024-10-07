@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import { type DoctorData } from "../common/types";
 import { doctorRegisterSchema } from "../schemas/doctor.schema";
 import supabase from "../config/supabase";
+import logger from "../logger";
 
 export const getDoctorsList = async (
   _req: Request,
@@ -52,7 +53,6 @@ export const getDoctorWithID = async (
  * @returns  Response
  */
 export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
-  console.log(process.env.DATABASE_URL);
   const { phone, password } = req.body;
   const doctor = await prisma.doctor.findUnique({ where: { phone } });
   if (!doctor) {
@@ -74,7 +74,7 @@ export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
     return res.status(200).json({
       status: Status.SUCCESS,
       message: "Login successful",
-      data: { token, id: doctor.id },
+      data: { token, id: doctor.id, name: doctor.name },
     });
   } catch (err) {
     console.log(err);
@@ -92,6 +92,7 @@ export const handleDoctorRegister = async (
   const result = doctorRegisterSchema.safeParse(req);
 
   if (!result.success) {
+    logger.error(result.error);
     return res
       .status(400)
       .json({ status: Status.FAILED, code: 400, message: result.error });
@@ -102,24 +103,46 @@ export const handleDoctorRegister = async (
       where: { phone: req.body.user.phone },
     });
     if (doctor) {
+      logger.warn({
+        message: "User already exists",
+        interactionId: req.headers.interactionId,
+      });
       return res
         .status(400)
         .json({ status: Status.FAILED, message: "User already exists" });
     }
-    doctor = await handleSignatureFileUpload({
+    const { user, error } = await handleSignatureFileUpload({
       file: req.file,
       body: req.body,
     });
-    doctor.password = await bcrypt.hash(doctor.password, 10);
-    const response = await prisma.doctor.create({ data: doctor });
+    if (user === null) {
+      logger.error({
+        message: "Error uploading signature file",
+        interactionId: req.headers.interactionId,
+        ...error
+      });
+      return res
+        .status(500)
+        .json({
+          status: Status.INTERNAL_SERVER_ERROR,
+          message: "Error uploading signature file",
+        });
+    }
+    user.password = await bcrypt.hash(user.password, 10);
+    const response = await prisma.doctor.create({ data: user });
     return res.status(201).json({
       status: Status.SUCCESS,
       message: "Doctor registered successfully",
       data: { ...response, password: undefined },
     });
   } catch (err) {
-    console.log(err);
-    return res.status(500).json({ status: Status.ERROR, message: err });
+    logger.error({
+      message: "Failed to register doctor",
+      interactionId: req.headers.interactionId,
+    });
+    return res
+      .status(500)
+      .json({ status: Status.ERROR, message: "Failed to register doctor" });
   }
 };
 
@@ -158,22 +181,20 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
   });
 };
 
-const handleSignatureFileUpload = async (req): Promise<DoctorData> => {
+const handleSignatureFileUpload = async (req) => {
   const { user } = req.body;
   const filename = `${Date.now().toString()}-${req.file.originalname}`;
-  const bucket = process.env.SUPABASE_SIGNATURES_BUCKET ?? "misc";
-  try {
-    const { error } = await supabase.storage
-      .from(bucket)
-      .upload(filename, req.file.buffer, { contentType: "image/png" });
-    if (error) throw error;
-    const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
-
-    user.signatureUrl = data.publicUrl;
-    user.signatureFilename = filename;
-    user.id = user.id || randomUUID();
-    return user;
-  } catch (err) {
-    return err;
+  const bucket = process.env.SUPABASE_SIGNATURES_BUCKET as string;
+  const { error } = await supabase.storage
+    .from(bucket)
+    .upload(filename, req.file.buffer, { contentType: "image/png" });
+  if (error) {
+    return { user: null, error };
   }
+  const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
+
+  user.signatureUrl = data.publicUrl;
+  user.signatureFilename = filename;
+  user.id = user.id || randomUUID();
+  return { user, error: null };
 };
