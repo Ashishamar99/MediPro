@@ -5,8 +5,11 @@ import slotRouter from './slot';
 import consultationRouter from './consultation';
 import appointmentRouter from './appointment';
 import { auth } from '../middleware/auth';
+import assignInteractionId from '../middleware/flow-control';
 
 const router = express.Router();
+
+router.use(assignInteractionId);
 
 router.use("/patient", patientRouter);
 
