@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import cors from "cors";
 import dotenv from "dotenv";
 
-import logger from "./logger";
+import logger from "./utils/logger";
 import router from "./routes";
 
 dotenv.config();
@@ -18,7 +18,6 @@ app.get("/health", (_req, res) => {
 });
 
 app.use("/api", router)
-
 
 app.listen(port, () => {
   logger.info(`Application started at port ${port}`);

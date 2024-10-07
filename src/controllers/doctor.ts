@@ -4,10 +4,9 @@ import { randomUUID } from "crypto";
 import { Status } from "../common/status";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { type DoctorData } from "../common/types";
 import { doctorRegisterSchema } from "../schemas/doctor.schema";
 import supabase from "../config/supabase";
-import logger from "../logger";
+import logger from "../utils/logger";
 
 export const getDoctorsList = async (
   _req: Request,
@@ -15,10 +14,11 @@ export const getDoctorsList = async (
 ): Promise<Response> => {
   try {
     return res.json({
-      status: "Success",
+      status: Status.SUCCESS,
       data: await prisma.doctor.findMany(),
     });
   } catch (error) {
+    logger.error({ message: "Failed to fetch doctors list", error });
     return res.json({
       status: "Failed",
       code: 500,
@@ -105,7 +105,6 @@ export const handleDoctorRegister = async (
     if (doctor) {
       logger.warn({
         message: "User already exists",
-        interactionId: req.headers.interactionId,
       });
       return res
         .status(400)
@@ -118,15 +117,12 @@ export const handleDoctorRegister = async (
     if (user === null) {
       logger.error({
         message: "Error uploading signature file",
-        interactionId: req.headers.interactionId,
-        ...error
+        ...error,
       });
-      return res
-        .status(500)
-        .json({
-          status: Status.INTERNAL_SERVER_ERROR,
-          message: "Error uploading signature file",
-        });
+      return res.status(500).json({
+        status: Status.INTERNAL_SERVER_ERROR,
+        message: "Error uploading signature file",
+      });
     }
     user.password = await bcrypt.hash(user.password, 10);
     const response = await prisma.doctor.create({ data: user });
@@ -138,7 +134,6 @@ export const handleDoctorRegister = async (
   } catch (err) {
     logger.error({
       message: "Failed to register doctor",
-      interactionId: req.headers.interactionId,
     });
     return res
       .status(500)

@@ -6,10 +6,13 @@ import consultationRouter from './consultation';
 import appointmentRouter from './appointment';
 import { auth } from '../middleware/auth';
 import assignInteractionId from '../middleware/flow-control';
+import { logRequestMiddleware } from '../middleware/logger';
 
 const router = express.Router();
 
 router.use(assignInteractionId);
+
+router.use(logRequestMiddleware)
 
 router.use("/patient", patientRouter);
 

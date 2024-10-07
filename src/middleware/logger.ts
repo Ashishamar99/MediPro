@@ -1,5 +1,11 @@
-import logger from "../logger"
+import logger from "../utils/logger";
 
-export const logInfo = (req, message) => {
-  logger.info({message, interactionId: req.headers.interactionId})
-}
+export const logRequestMiddleware = (req, _res, next) => {
+  logger.info({
+    message: "HTTP Request",
+    method: req.method,
+    url: req.url,
+    headers: req.headers,
+  });
+  next();
+};
