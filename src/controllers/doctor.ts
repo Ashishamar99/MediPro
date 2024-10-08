@@ -86,16 +86,13 @@ export const handleDoctorRegister = async (
   req: Request,
   res: Response
 ): Promise<Response<void>> => {
-  if (typeof req.body.user === "string") {
-    req.body.user = JSON.parse(req.body.user);
-  }
-  const result = doctorRegisterSchema.safeParse(req);
+   const result = doctorRegisterSchema.safeParse(req);
 
   if (!result.success) {
-    logger.error(result.error);
+    logger.error({error: result.error, headers: req.headers});
     return res
       .status(400)
-      .json({ status: Status.FAILED, code: 400, message: result.error });
+      .json({ status: Status.FAILED, message: result.error });
   }
 
   try {
@@ -115,14 +112,7 @@ export const handleDoctorRegister = async (
       body: req.body,
     });
     if (user === null) {
-      logger.error({
-        message: "Error uploading signature file",
-        ...error,
-      });
-      return res.status(500).json({
-        status: Status.INTERNAL_SERVER_ERROR,
-        message: "Error uploading signature file",
-      });
+      throw new Error("Error uploading signature file")
     }
     user.password = await bcrypt.hash(user.password, 10);
     const response = await prisma.doctor.create({ data: user });
@@ -134,10 +124,13 @@ export const handleDoctorRegister = async (
   } catch (err) {
     logger.error({
       message: "Failed to register doctor",
+      error: err.name,
+      description: err.message,
+      stack: err.stack,
     });
     return res
       .status(500)
-      .json({ status: Status.ERROR, message: "Failed to register doctor" });
+      .json({ status: Status.INTERNAL_SERVER_ERROR, message: "Failed to register doctor" });
   }
 };
 
