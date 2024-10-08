@@ -12,6 +12,10 @@ router.get("/", auth, (req, res) => {
   void doctorController.getDoctorsList(req, res);
 });
 
+router.get("/", auth, (req, res) => {
+  void doctorController.handleDoctorUpdate(req, res);
+})
+
 router.get("/:id", auth, (req, res) => {
   void doctorController.getDoctorWithID(req, res);
 });
