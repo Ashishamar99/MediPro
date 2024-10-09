@@ -18,9 +18,7 @@ export const doctorLoginSchema = z.object({
 
 export const doctorSignatureFileUpdateSchema = z.object({
   file: z.any().refine((file) => file !== undefined, `File is required`),
-  body: z.object({
-    user: z.object({
-      id: z.number(),
-    }),
+  params: z.object({
+    id: z.string(),
   }),
 });

@@ -7,6 +7,7 @@ import jwt from "jsonwebtoken";
 import {
   doctorLoginSchema,
   doctorRegisterSchema,
+  doctorSignatureFileUpdateSchema,
 } from "../schemas/doctor.schema";
 import supabase from "../config/supabase";
 import logger from "../utils/logger";
@@ -100,7 +101,7 @@ export const handleDoctorRegister = async (
   const result = doctorRegisterSchema.safeParse(req);
   const { user } = req.body;
   if (!result.success) {
-    logger.error({ error: result.error, headers: req.headers });
+    logger.error({ error: result.error });
     return res
       .status(400)
       .json({ status: Status.FAILED, message: result.error });
@@ -143,14 +144,21 @@ export const handleDoctorRegister = async (
   }
 };
 
-export const handleDoctorUpdate = async (
+export const handleSignatureFileUpload = async (
   req: Request,
   res: Response
 ): Promise<Response<void>> => {
   try {
-    const userId = req.body.user.id;
-    const doctor = await prisma.doctor.findUnique({ where: { id: userId } });
+    const schemaValidation = doctorSignatureFileUpdateSchema.safeParse(req);
+    const { id } = req.params;
 
+    if (!schemaValidation.success) {
+      logger.error({ error: schemaValidation.error });
+      return res
+        .status(400)
+        .json({ status: Status.FAILED, message: schemaValidation.error });
+    }
+    const doctor = await prisma.doctor.findUnique({ where: { id } });
     if (!doctor) {
       logger.warn({
         message: "User not found",
@@ -159,20 +167,25 @@ export const handleDoctorUpdate = async (
         .status(400)
         .json({ status: Status.FAILED, message: "User not found" });
     }
-    await handleSignatureFileUpload(req.file, doctor);
+    await uploadSignatureFile(req.file, doctor);
+    doctor.updatedAt = new Date();
     const result = await prisma.doctor.update({
       where: { id: doctor.id },
       data: doctor,
     });
     logger.info({ message: "Doctor data update successful" });
-    return res
-      .status(200)
-      .json({
-        status: Status.SUCCESS,
-        message: "Doctor data update successful",
-        data: { ...result, password: undefined },
-      });
+    return res.status(200).json({
+      status: Status.SUCCESS,
+      message: "Doctor data update successful",
+      data: { ...result, password: undefined },
+    });
   } catch (err) {
+    logger.error({
+      message: "Failed to upload signature file",
+      error: err.name,
+      description: err.message,
+      stack: err.stack,
+    });
     return res.status(500).json({
       status: Status.INTERNAL_SERVER_ERROR,
       message: "Failed to upload signature file",
@@ -217,18 +230,18 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
   });
 };
 
-const handleSignatureFileUpload = async (file, user) => {
-  const filename = `${Date.now().toString()}-${file.originalname}`;
+const uploadSignatureFile = async (file, user) => {
+  const filename = `${user.id}/signature`;
   const bucket = process.env.SUPABASE_SIGNATURES_BUCKET as string;
   const { error } = await supabase.storage
     .from(bucket)
-    .upload(filename, file.buffer, { contentType: "image/png" });
+    .upload(filename, file.buffer, {
+      contentType: "image/png",
+      upsert: true,
+    });
   if (error) {
-    logger.error(error);
-    throw new Error("Error uploading signature file");
+    throw new Error(error.message);
   }
   const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
-
   user.signatureUrl = data.publicUrl;
-  user.signatureFilename = filename;
 };
