@@ -44,7 +44,10 @@ export const getDoctorWithID = async (
   const id = req.params.id;
   try {
     const doctor = await prisma.doctor.findUnique({ where: { id } });
-    return res.json({ status: Status.SUCCESS, ...doctor, password: undefined });
+    return res.json({
+      status: Status.SUCCESS,
+      data: { ...doctor, password: undefined },
+    });
   } catch (err) {
     return res.json({ status: Status.ERROR, message: err });
   }
@@ -217,9 +220,13 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
       .json({ status: "Not found", message: "No doctor found for given id" });
   }
   if (doctor.signatureUrl) {
-    await supabase.storage
+    const { error } = await supabase.storage
       .from("medipro-signatures")
       .remove([`${doctor.id}/signature.png`]);
+
+    if (error) {
+      throw new Error(error.message);
+    }
   }
   //using raw query to delete as there is a bug in prisma delete on cascade
   const data = await prisma.$queryRaw`DELETE FROM "Doctor" WHERE id = ${id}`;

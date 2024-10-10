@@ -30,7 +30,7 @@ class PrismaSingleton {
       logger.info("Database connection established successfully.");
     } catch (error) {
       logger.error("Failed to connect to the database:", error);
-      process.exit(1); 
+      process.exit(1);
     } finally {
       await this.prisma.$disconnect();
     }
