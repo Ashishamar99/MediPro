@@ -4,10 +4,13 @@ import { randomUUID } from "crypto";
 import { Status } from "../common/status";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { type DoctorData } from "../common/types";
-import { doctorRegisterSchema } from "../schemas/doctor.schema";
+import {
+  doctorLoginSchema,
+  doctorRegisterSchema,
+  doctorSignatureFileUpdateSchema,
+} from "../schemas/doctor.schema";
 import supabase from "../config/supabase";
-import logger from "../logger";
+import logger from "../utils/logger";
 
 export const getDoctorsList = async (
   _req: Request,
@@ -15,10 +18,11 @@ export const getDoctorsList = async (
 ): Promise<Response> => {
   try {
     return res.json({
-      status: "Success",
+      status: Status.SUCCESS,
       data: await prisma.doctor.findMany(),
     });
   } catch (error) {
+    logger.error({ message: "Failed to fetch doctors list", error });
     return res.json({
       status: "Failed",
       code: 500,
@@ -40,7 +44,10 @@ export const getDoctorWithID = async (
   const id = req.params.id;
   try {
     const doctor = await prisma.doctor.findUnique({ where: { id } });
-    return res.json({ status: Status.SUCCESS, ...doctor, password: undefined });
+    return res.json({
+      status: Status.SUCCESS,
+      data: { ...doctor, password: undefined },
+    });
   } catch (err) {
     return res.json({ status: Status.ERROR, message: err });
   }
@@ -53,7 +60,14 @@ export const getDoctorWithID = async (
  * @returns  Response
  */
 export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
-  const { phone, password } = req.body;
+  const result = doctorLoginSchema.safeParse(req.body);
+  if (!result.success) {
+    logger.warn(result.error);
+    return res
+      .status(400)
+      .json({ status: Status.BAD_REQUEST, message: "Invalid request body" });
+  }
+  const { phone, password } = req.body.user;
   const doctor = await prisma.doctor.findUnique({ where: { phone } });
   if (!doctor) {
     return res
@@ -62,13 +76,14 @@ export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
   }
   const isPasswordValid = await bcrypt.compare(password, doctor.password);
   if (!isPasswordValid) {
+    logger.warn({ message: "Invalid credentials" });
     return res
       .status(401)
       .json({ status: Status.FAILED, message: "Invalid credentials" });
   }
 
   try {
-    const token = jwt.sign({ phone }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: doctor.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
     return res.status(200).json({
@@ -86,50 +101,33 @@ export const handleDoctorRegister = async (
   req: Request,
   res: Response
 ): Promise<Response<void>> => {
-  if (typeof req.body.user === "string") {
-    req.body.user = JSON.parse(req.body.user);
-  }
   const result = doctorRegisterSchema.safeParse(req);
-
+  const { user } = req.body;
   if (!result.success) {
-    logger.error(result.error);
+    logger.error({ error: result.error });
     return res
       .status(400)
-      .json({ status: Status.FAILED, code: 400, message: result.error });
+      .json({ status: Status.FAILED, message: result.error });
   }
 
   try {
     let doctor = await prisma.doctor.findUnique({
-      where: { phone: req.body.user.phone },
+      where: { phone: user.phone },
     });
     if (doctor) {
       logger.warn({
         message: "User already exists",
-        interactionId: req.headers.interactionId,
       });
       return res
         .status(400)
         .json({ status: Status.FAILED, message: "User already exists" });
     }
-    const { user, error } = await handleSignatureFileUpload({
-      file: req.file,
-      body: req.body,
-    });
-    if (user === null) {
-      logger.error({
-        message: "Error uploading signature file",
-        interactionId: req.headers.interactionId,
-        ...error
-      });
-      return res
-        .status(500)
-        .json({
-          status: Status.INTERNAL_SERVER_ERROR,
-          message: "Error uploading signature file",
-        });
-    }
     user.password = await bcrypt.hash(user.password, 10);
+    user.id = randomUUID();
     const response = await prisma.doctor.create({ data: user });
+    logger.info({
+      message: "Doctor registered successfully",
+    });
     return res.status(201).json({
       status: Status.SUCCESS,
       message: "Doctor registered successfully",
@@ -138,11 +136,63 @@ export const handleDoctorRegister = async (
   } catch (err) {
     logger.error({
       message: "Failed to register doctor",
-      interactionId: req.headers.interactionId,
+      error: err.name,
+      description: err.message,
+      stack: err.stack,
     });
-    return res
-      .status(500)
-      .json({ status: Status.ERROR, message: "Failed to register doctor" });
+    return res.status(500).json({
+      status: Status.INTERNAL_SERVER_ERROR,
+      message: "Failed to register doctor",
+    });
+  }
+};
+
+export const handleSignatureFileUpload = async (
+  req: Request,
+  res: Response
+): Promise<Response<void>> => {
+  try {
+    const schemaValidation = doctorSignatureFileUpdateSchema.safeParse(req);
+    const { id } = req.params;
+
+    if (!schemaValidation.success) {
+      logger.error({ error: schemaValidation.error });
+      return res
+        .status(400)
+        .json({ status: Status.FAILED, message: schemaValidation.error });
+    }
+    const doctor = await prisma.doctor.findUnique({ where: { id } });
+    if (!doctor) {
+      logger.warn({
+        message: "User not found",
+      });
+      return res
+        .status(400)
+        .json({ status: Status.FAILED, message: "User not found" });
+    }
+    await uploadSignatureFile(req.file, doctor);
+    doctor.updatedAt = new Date();
+    const result = await prisma.doctor.update({
+      where: { id: doctor.id },
+      data: doctor,
+    });
+    logger.info({ message: "Doctor data update successful" });
+    return res.status(200).json({
+      status: Status.SUCCESS,
+      message: "Doctor data update successful",
+      data: { ...result, password: undefined },
+    });
+  } catch (err) {
+    logger.error({
+      message: "Failed to upload signature file",
+      error: err.name,
+      description: err.message,
+      stack: err.stack,
+    });
+    return res.status(500).json({
+      status: Status.INTERNAL_SERVER_ERROR,
+      message: "Failed to upload signature file",
+    });
   }
 };
 
@@ -169,9 +219,15 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
       .status(404)
       .json({ status: "Not found", message: "No doctor found for given id" });
   }
-  await supabase.storage
-    .from("medipro-signatures")
-    .remove([doctor.signatureFilename]);
+  if (doctor.signatureUrl) {
+    const { error } = await supabase.storage
+      .from("medipro-signatures")
+      .remove([`${doctor.id}/signature.png`]);
+
+    if (error) {
+      throw new Error(error.message);
+    }
+  }
   //using raw query to delete as there is a bug in prisma delete on cascade
   const data = await prisma.$queryRaw`DELETE FROM "Doctor" WHERE id = ${id}`;
   return res.json({
@@ -181,20 +237,18 @@ export const deleteDoctorWithID = async (req, res): Promise<void> => {
   });
 };
 
-const handleSignatureFileUpload = async (req) => {
-  const { user } = req.body;
-  const filename = `${Date.now().toString()}-${req.file.originalname}`;
+const uploadSignatureFile = async (file, user) => {
+  const filename = `${user.id}/signature`;
   const bucket = process.env.SUPABASE_SIGNATURES_BUCKET as string;
   const { error } = await supabase.storage
     .from(bucket)
-    .upload(filename, req.file.buffer, { contentType: "image/png" });
+    .upload(filename, file.buffer, {
+      contentType: "image/png",
+      upsert: true,
+    });
   if (error) {
-    return { user: null, error };
+    throw new Error(error.message);
   }
   const { data } = supabase.storage.from(bucket).getPublicUrl(filename);
-
   user.signatureUrl = data.publicUrl;
-  user.signatureFilename = filename;
-  user.id = user.id || randomUUID();
-  return { user, error: null };
 };

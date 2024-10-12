@@ -1,7 +1,7 @@
 // prismaSingleton.ts
 
 import { PrismaClient } from "@prisma/client";
-import logger from "../logger";
+import logger from "../utils/logger";
 
 class PrismaSingleton {
   private readonly prisma: PrismaClient;
@@ -25,11 +25,12 @@ class PrismaSingleton {
 
   public async checkDbConnection() {
     try {
+      logger.info("Connecting to database...");
       await this.prisma.$connect();
       logger.info("Database connection established successfully.");
     } catch (error) {
       logger.error("Failed to connect to the database:", error);
-      process.exit(1); 
+      process.exit(1);
     } finally {
       await this.prisma.$disconnect();
     }

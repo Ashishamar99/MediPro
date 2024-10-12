@@ -16,6 +16,10 @@ router.get("/:id", auth, (req, res) => {
   void doctorController.getDoctorWithID(req, res);
 });
 
+router.patch("/:id", auth, upload.single("signature"), (req, res) => {
+  void doctorController.handleSignatureFileUpload(req, res);
+});
+
 router.delete("/:id", auth, (req, res) => {
   void doctorController.deleteDoctorWithID(req, res);
 });
@@ -24,7 +28,7 @@ router.post("/get-doctor-with-role", auth, (req, res) => {
   void doctorController.getDoctorWithRole(req, res);
 });
 
-router.post("/register", upload.single("signature"), (req, res) => {
+router.post("/register", (req, res) => {
   void doctorController.handleDoctorRegister(req, res);
 });
 

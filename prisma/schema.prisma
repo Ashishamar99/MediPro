@@ -14,19 +14,18 @@ datasource db {
 }
 
 model Doctor {
-  id                String         @id @default(uuid())
-  name              String
-  phone             String         @unique
-  imageUrl          String
-  signatureUrl      String
-  signatureFilename String
-  role              String
-  password          String
-  createdAt         DateTime       @default(now())
-  updatedAt         DateTime       @default(now())
-  Appointment       Appointment[]
-  Slot              Slot[]
-  Consultation      Consultation[]
+  id           String         @id @default(uuid())
+  name         String
+  phone        String         @unique
+  imageUrl     String?
+  signatureUrl String?
+  role         String
+  password     String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now())
+  Appointment  Appointment[]
+  Slot         Slot[]
+  Consultation Consultation[]
 }
 
 model Patient {
@@ -85,8 +84,8 @@ model Consultation {
   prescriptionUrl      String
   prescriptionFilename String
   audio                String
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @default(now())
+  createdAt            DateTime    @default(now())
+  updatedAt            DateTime    @default(now())
 
   @@index([doctorId])
   @@index([patientId])

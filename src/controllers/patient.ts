@@ -70,7 +70,7 @@ export const handlePatientLogin = async (req, res): Promise<void> => {
         .status(401)
         .json({ status: Status.FAILED, message: "Invalid credentials" });
     }
-    const token = jwt.sign({ phone }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: patient.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
     return res.status(200).json({
