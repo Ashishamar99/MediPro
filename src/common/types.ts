@@ -1,5 +1,3 @@
-import { IncomingHttpHeaders } from "http";
-
 export interface DoctorData {
   id: string;
   name: string;

@@ -125,6 +125,7 @@ export const handleDoctorRegister = async (
     if (doctor) {
       logger.warn({
         message: "User already exists",
+        interactionId: req.get("interactionId"),
       });
       return res
         .status(400)

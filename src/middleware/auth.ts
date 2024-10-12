@@ -29,8 +29,6 @@ export const auth = (
       });
       return;
     }
-    // @ts-ignore
-    req.user = decoded;
     next();
   } catch (error) {
     return res

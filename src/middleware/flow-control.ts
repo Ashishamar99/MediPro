@@ -1,4 +1,4 @@
-import { NextFunction } from "express";
+import { NextFunction, Request, Response } from "express";
 
 const { v4: uuidv4, validate: uuidValidate } = require("uuid");
 
@@ -7,12 +7,11 @@ export default function assignInteractionId(
   res: Response,
   next: NextFunction,
 ): void {
-  let interactionId = req.headers.get("interactionId");
+  let interactionId = req.get("interactionId");
   if (!interactionId) {
     interactionId = uuidv4();
-    req.headers.set("interactionId", interactionId as string);
+    req.headers.interactionId = interactionId;
   }
-
-  res.headers.set("interactionId", interactionId as string);
+  res.set({ interactionId });
   next();
 }

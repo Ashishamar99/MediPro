@@ -4,7 +4,7 @@ import supabase from "../config/supabase";
 
 export const getConsultationList = async (
   req: any,
-  res: any
+  res: any,
 ): Promise<void> => {
   try {
     const data = await prisma.consultation.findMany();
@@ -22,7 +22,7 @@ export const getConsultationList = async (
 
 export const getConsultationWithID = async (
   req: { params: { id: any } },
-  res: any
+  res: any,
 ): Promise<void> => {
   const id = req.params.id;
   try {
@@ -41,7 +41,7 @@ export const getConsultationWithID = async (
 
 export const getPatientConsultation = async (
   req: { params: { id: any } },
-  res: any
+  res: any,
 ): Promise<void> => {
   const id = req.params.id;
 
@@ -63,7 +63,7 @@ export const getPatientConsultation = async (
 
 export const getDoctorConsultation = async (
   req: { params: { id: any } },
-  res: any
+  res: any,
 ): Promise<void> => {
   const id = req.params.id;
 
@@ -92,7 +92,7 @@ export const getDoctorConsultation = async (
 
 export const addConsultationInfo = async (
   req: { body: { prescription: string } },
-  res: any
+  res: any,
 ): Promise<void> => {
   let payload = JSON.parse(req.body.prescription);
   try {
