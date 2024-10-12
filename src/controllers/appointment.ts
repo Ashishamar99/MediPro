@@ -1,7 +1,12 @@
 import prisma from "../config/prisma";
 import { Status } from "../common/status";
+import { Request, Response } from "express-serve-static-core";
+import { ParsedQs } from "qs";
 
-export const getAppointmentList = async (_req, res): Promise<void> => {
+export const getAppointmentList = async (
+  _req: Request<{}, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   try {
     return res.json({
       status: Status.SUCCESS,
@@ -17,7 +22,10 @@ export const getAppointmentList = async (_req, res): Promise<void> => {
   }
 };
 
-export const createAppointment = async (req, res): Promise<void> => {
+export const createAppointment = async (
+  req: Request<{}, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   const { patientId, doctorId, slotNumber } = req.body;
   try {
     const slot = await prisma.slot.findFirst({
@@ -82,20 +90,23 @@ export const createAppointment = async (req, res): Promise<void> => {
       return { ...appointment, slot: result };
     });
 
-    return res
-      .status(201)
-      .json({
-        status: Status.SUCCESS,
-        message: "Appointment created successfully",
-        data,
-      });
+    return res.status(201).json({
+      status: Status.SUCCESS,
+      message: "Appointment created successfully",
+      data,
+    });
   } catch (err) {
     console.log(err);
-    return res.status(500).json({ status: Status.ERROR, message: err.message });
+    return res
+      .status(500)
+      .json({ status: Status.ERROR, message: (err as Error).message });
   }
 };
 
-export const cancelAppointment = async (req, res): Promise<void> => {
+export const cancelAppointment = async (
+  req: Request<{}, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   const { id, slotNumber, doctorId } = req.body;
 
   try {
@@ -146,20 +157,21 @@ export const cancelAppointment = async (req, res): Promise<void> => {
         .json({ status: Status.FAILED, message: "Slot not found" });
     }
 
-    return res
-      .status(200)
-      .json({
-        status: Status.SUCCESS,
-        message: "Appointment cancelled successfully",
-        data: result,
-      });
+    return res.status(200).json({
+      status: Status.SUCCESS,
+      message: "Appointment cancelled successfully",
+      data: result,
+    });
   } catch (err) {
     console.error(err);
     return res.status(500).json({ status: Status.ERROR, message: err });
   }
 };
 
-export const getAppointmentWithID = async (req, res): Promise<void> => {
+export const getAppointmentWithID = async (
+  req: Request<{ id: string }, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   const id = req.params.id;
   try {
     const appointments = await prisma.appointment.findUnique({
@@ -177,7 +189,10 @@ export const getAppointmentWithID = async (req, res): Promise<void> => {
   }
 };
 
-export const getAppointmentWithPID = async (req, res): Promise<void> => {
+export const getAppointmentWithPID = async (
+  req: Request<{ id: string }, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   const id = req.params.id;
   try {
     const appointments = await prisma.appointment.findMany({
@@ -195,7 +210,10 @@ export const getAppointmentWithPID = async (req, res): Promise<void> => {
   }
 };
 
-export const getAppointmentWithDID = async (req, res): Promise<void> => {
+export const getAppointmentWithDID = async (
+  req: Request<{ id: string }, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   const id = req.params.id;
   try {
     const appointments = await prisma.appointment.findMany({
@@ -206,8 +224,8 @@ export const getAppointmentWithDID = async (req, res): Promise<void> => {
         patient: true,
         slot: {
           select: {
-            slotNumber: true
-          }
+            slotNumber: true,
+          },
         },
       },
     });

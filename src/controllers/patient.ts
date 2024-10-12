@@ -1,9 +1,14 @@
+import { Request, ParamsDictionary, Response } from "express-serve-static-core";
+import { ParsedQs } from "qs";
 import { Status } from "../common/status";
 import prisma from "../config/prisma";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-export const handlePatientRegister = async (req, res): Promise<void> => {
+export const handlePatientRegister = async (
+  req: Request<{}, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   const patient = req.body.user;
 
   try {
@@ -28,7 +33,10 @@ export const handlePatientRegister = async (req, res): Promise<void> => {
   }
 };
 
-export const updatePatientRegister = async (req, res): Promise<void> => {
+export const updatePatientRegister = async (
+  req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   const { name, id, phone, gender, age } = req.body.user;
   const patient = {
     name,
@@ -54,7 +62,10 @@ export const updatePatientRegister = async (req, res): Promise<void> => {
   }
 };
 
-export const handlePatientLogin = async (req, res): Promise<void> => {
+export const handlePatientLogin = async (
+  req: Request<{}, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   const { phone, password } = req.body.user;
 
   try {
@@ -70,9 +81,13 @@ export const handlePatientLogin = async (req, res): Promise<void> => {
         .status(401)
         .json({ status: Status.FAILED, message: "Invalid credentials" });
     }
-    const token = jwt.sign({ id: patient.id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    const token = jwt.sign(
+      { id: patient.id },
+      process.env.JWT_SECRET as string,
+      {
+        expiresIn: "1h",
+      },
+    );
     return res.status(200).json({
       status: Status.SUCCESS,
       message: "Login successful",
@@ -83,7 +98,10 @@ export const handlePatientLogin = async (req, res): Promise<void> => {
   }
 };
 
-export const getPatientsList = async (req, res): Promise<void> => {
+export const getPatientsList = async (
+  req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   try {
     return res.json({
       status: Status.SUCCESS,
@@ -104,7 +122,10 @@ export const getPatientsList = async (req, res): Promise<void> => {
  * @name getPatientWithID
  * @description Get patient details by id
  */
-export const getPatientWithID = async (req, res): Promise<void> => {
+export const getPatientWithID = async (
+  req: Request<ParamsDictionary, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   const id = req.params.id;
   try {
     const data = await prisma.patient.findUnique({ where: { id } });

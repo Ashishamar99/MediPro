@@ -1,7 +1,12 @@
 import prisma from "../config/prisma";
 import { Status } from "../common/status";
+import { Request, Response } from "express-serve-static-core";
+import { ParsedQs } from "qs";
 
-export const getSlots = async (_req, res): Promise<void> => {
+export const getSlots = async (
+  _req: Request<{}, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   try {
     const slots = await prisma.slot.findMany();
     return res.status(200).json({ status: Status.SUCCESS, data: slots });
@@ -11,11 +16,14 @@ export const getSlots = async (_req, res): Promise<void> => {
   }
 };
 
-export const getAvailableSlots = async (req, res): Promise<void> => {
+export const getAvailableSlots = async (
+  req: Request<{}, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   try {
     const slots = await prisma.slot.findMany({
       where: {
-        doctorId: req.query.id,
+        doctorId: req.query.id as string,
         status: "available",
       },
     });
@@ -26,7 +34,10 @@ export const getAvailableSlots = async (req, res): Promise<void> => {
   }
 };
 
-export const bookSlot = async (req, res): Promise<void> => {
+export const bookSlot = async (
+  req: Request<{}, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
   let { doctorId, slotDate, slotNumber } = req.body;
   try {
     const existingSlot = await prisma.slot.findFirst({
@@ -52,6 +63,6 @@ export const bookSlot = async (req, res): Promise<void> => {
     console.error("Error booking slot:", error);
     return res
       .status(500)
-      .json({ status: Status.ERROR, message: error.message });
+      .json({ status: Status.ERROR, message: (error as Error).message });
   }
 };

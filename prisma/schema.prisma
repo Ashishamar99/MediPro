@@ -22,7 +22,7 @@ model Doctor {
   role         String
   password     String
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   Appointment  Appointment[]
   Slot         Slot[]
   Consultation Consultation[]
@@ -37,7 +37,7 @@ model Patient {
   age          Int
   password     String
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   Appointment  Appointment[]
   Consultation Consultation[]
 }
@@ -66,7 +66,7 @@ model Appointment {
   patientId    String
   slotId       String
   createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
 
   @@index([doctorId])
   @@index([patientId])
@@ -85,7 +85,7 @@ model Consultation {
   prescriptionFilename String
   audio                String
   createdAt            DateTime    @default(now())
-  updatedAt            DateTime    @default(now())
+  updatedAt            DateTime    @updatedAt
 
   @@index([doctorId])
   @@index([patientId])

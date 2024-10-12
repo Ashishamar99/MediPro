@@ -11,7 +11,7 @@ import {
   logRequestMiddleware,
 } from "../middleware/logger";
 
-const router = express.Router();
+const router: any = express.Router();
 
 router.use(assignInteractionId);
 
