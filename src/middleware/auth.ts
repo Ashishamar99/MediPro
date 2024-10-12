@@ -2,6 +2,7 @@
 import { type Request, type Response, type NextFunction } from "express";
 import jwt from "jsonwebtoken";
 import { Status } from "../common/status";
+import logger from "../utils/logger";
 
 export const auth = (
   req: Request,
@@ -17,6 +18,17 @@ export const auth = (
   }
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET ?? "");
+    const { id } = decoded;
+    if (id !== req.headers.id) {
+      res.status(403).json({
+        status: Status.FORBIDDEN,
+        message: "You are not authorized to access this resource",
+      });
+      logger.error({
+        message: `Invalid authorization request by user: ${decoded.id}, provided: ${req.headers.id}`,
+      });
+      return;
+    }
     // @ts-ignore
     req.user = decoded;
     next();

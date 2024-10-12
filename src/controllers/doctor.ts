@@ -83,7 +83,7 @@ export const handleDoctorLogin = async (req, res): Promise<Response<void>> => {
   }
 
   try {
-    const token = jwt.sign({ phone }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: doctor.id }, process.env.JWT_SECRET, {
       expiresIn: "1h",
     });
     return res.status(200).json({
