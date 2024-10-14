@@ -1,7 +1,7 @@
 // auth middleware
 import { type Request, type Response, type NextFunction } from "express";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { Status } from "../common/status";
+import { Status } from "../utils/status";
 import logger from "../utils/logger";
 
 export const auth = (

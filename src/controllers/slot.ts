@@ -1,5 +1,5 @@
 import prisma from "../config/prisma";
-import { Status } from "../common/status";
+import { Status } from "../utils/status";
 import { Request, Response } from "express-serve-static-core";
 import { ParsedQs } from "qs";
 

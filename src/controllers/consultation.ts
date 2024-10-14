@@ -1,4 +1,4 @@
-import { Status } from "../common/status";
+import { Status } from "../utils/status";
 import prisma from "../config/prisma";
 import supabase from "../config/supabase";
 
