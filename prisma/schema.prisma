@@ -44,7 +44,6 @@ model Patient {
 
 model Slot {
   id          String        @id @default(uuid())
-  slotNumber  Int
   doctorId    String
   date        DateTime      @default(now()) @db.Date
   startTime   DateTime

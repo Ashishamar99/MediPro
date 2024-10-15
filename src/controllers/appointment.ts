@@ -26,11 +26,10 @@ export const createAppointment = async (
   req: Request<{}, any, any, ParsedQs, Record<string, any>>,
   res: Response<any, Record<string, any>, number>,
 ): Promise<any> => {
-  const { patientId, doctorId, slotNumber } = req.body;
+  const { patientId, doctorId } = req.body;
   try {
     const slot = await prisma.slot.findFirst({
       where: {
-        slotNumber,
         doctorId,
       },
       select: {
@@ -67,7 +66,6 @@ export const createAppointment = async (
       const result = await trx.slot.update({
         where: {
           id: slot.id,
-          slotNumber,
           doctorId,
         },
         data: {
@@ -107,7 +105,7 @@ export const cancelAppointment = async (
   req: Request<{}, any, any, ParsedQs, Record<string, any>>,
   res: Response<any, Record<string, any>, number>,
 ): Promise<any> => {
-  const { id, slotNumber, doctorId } = req.body;
+  const { id, doctorId } = req.body;
 
   try {
     const existingAppointment = await prisma.appointment.findFirst({
@@ -141,7 +139,6 @@ export const cancelAppointment = async (
       const result = await trx.slot.update({
         where: {
           id: existingAppointment.slot.id,
-          slotNumber,
           doctorId,
         },
         data: {
@@ -222,11 +219,6 @@ export const getAppointmentWithDID = async (
       },
       include: {
         patient: true,
-        slot: {
-          select: {
-            slotNumber: true,
-          },
-        },
       },
     });
     return res.status(200).json({ status: Status.SUCCESS, data: appointments });

@@ -15,7 +15,7 @@ import { INTERACTION_ID } from "../utils/constants";
 
 export const getDoctorsList = async (
   _req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   try {
     return res.json({
@@ -40,7 +40,7 @@ export const getDoctorsList = async (
 
 export const getDoctorWithID = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response> => {
   const id = req.params.id;
   try {
@@ -62,7 +62,7 @@ export const getDoctorWithID = async (
  */
 export const handleDoctorLogin = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response<void>> => {
   const result = doctorLoginSchema.safeParse(req.body);
   if (!result.success) {
@@ -92,7 +92,7 @@ export const handleDoctorLogin = async (
       process.env.JWT_SECRET as string,
       {
         expiresIn: "1h",
-      }
+      },
     );
     return res.status(200).json({
       status: Status.SUCCESS,
@@ -107,7 +107,7 @@ export const handleDoctorLogin = async (
 
 export const handleDoctorRegister = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response<void>> => {
   const result = doctorRegisterSchema.safeParse(req);
   const { user } = req.body;
@@ -158,7 +158,7 @@ export const handleDoctorRegister = async (
 
 export const handleSignatureFileUpload = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response<void>> => {
   try {
     const schemaValidation = doctorSignatureFileUpdateSchema.safeParse(req);
@@ -206,7 +206,7 @@ export const handleSignatureFileUpload = async (
 
 export const getDoctorWithRole = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response<void>> => {
   const role: string = req.body.role;
   if (!role) {
@@ -222,7 +222,7 @@ export const getDoctorWithRole = async (
 
 export const deleteDoctorWithID = async (
   req: Request,
-  res: Response
+  res: Response,
 ): Promise<Response<void>> => {
   const id = req.params.id;
   const doctor = await prisma.doctor.findUnique({
@@ -253,7 +253,7 @@ export const deleteDoctorWithID = async (
 
 const uploadSignatureFile = async (
   file: Express.Multer.File | undefined,
-  user: any
+  user: any,
 ) => {
   if (file === undefined) {
     throw new Error("Invalid file");

@@ -6,7 +6,7 @@ const { v4: uuidv4, validate: uuidValidate } = require("uuid");
 export default function assignInteractionId(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   let interactionId = req.headers[INTERACTION_ID];
   if (!interactionId) {

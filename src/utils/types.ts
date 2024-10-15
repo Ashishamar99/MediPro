@@ -1,3 +1,5 @@
+import { Slot } from "@prisma/client";
+
 export interface DoctorData {
   id: string;
   name: string;
@@ -10,3 +12,5 @@ export interface DoctorData {
   updatedAt: Date;
   password: string;
 }
+
+export type CustomSlot = Omit<Slot, "id">;

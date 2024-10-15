@@ -5,7 +5,7 @@ import { INTERACTION_ID } from "../utils/constants";
 export const logRequestMiddleware = (
   req: Request,
   _res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   logger.info({
     message: "HTTP Request",
@@ -20,7 +20,7 @@ export const logCaughtExceptionMiddleware = (
   error: any,
   req: Request,
   _res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   logger.error({
     message: "Internal server error",
