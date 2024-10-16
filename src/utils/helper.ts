@@ -1,31 +1,25 @@
-import { CustomSlot } from "./types";
-
-export function generateTimeSlots(
-  date: Date,
+export function generateSlots(
+  availabilityId: number,
+  doctorId: string,
   startTime: Date,
   endTime: Date,
-  interval: number,
-  doctorId: string,
-): CustomSlot[] {
+  interval: number = 60,
+) {
   const slots = [];
   let currentStartTime = new Date(startTime);
+  let currentEndTime = new Date(currentStartTime);
+  currentEndTime.setMinutes(currentEndTime.getMinutes() + interval);
 
-  while (currentStartTime < endTime) {
-    const currentEndTime = new Date(
-      currentStartTime.getTime() + interval * 60000,
-    ); // Add interval in minutes
-
-    if (currentEndTime > endTime) break; // Do not create a slot that exceeds the endTime
-
+  while (currentEndTime <= endTime) {
     slots.push({
-      startTime: new Date(currentStartTime),
-      endTime: currentEndTime,
-      status: "available",
+      availabilityId,
       doctorId,
-      date,
+      startTime: new Date(currentStartTime),
+      endTime: new Date(currentEndTime),
     });
 
-    currentStartTime = currentEndTime; // Move to the next slot start time
+    currentStartTime.setMinutes(currentStartTime.getMinutes() + interval);
+    currentEndTime.setMinutes(currentEndTime.getMinutes() + interval);
   }
 
   return slots;

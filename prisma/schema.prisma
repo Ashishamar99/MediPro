@@ -23,9 +23,10 @@ model Doctor {
   password     String
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
-  Appointment  Appointment[]
   Slot         Slot[]
   Consultation Consultation[]
+
+  Appointment Appointment[]
 }
 
 model Patient {
@@ -42,16 +43,28 @@ model Patient {
   Consultation Consultation[]
 }
 
-model Slot {
-  id          String        @id @default(uuid())
-  doctorId    String
-  date        DateTime      @default(now()) @db.Date
-  startTime   DateTime
-  endTime     DateTime
-  status      String
-  doctor      Doctor        @relation(fields: [doctorId], references: [id])
-  Appointment Appointment[]
+model Availability {
+  id        Int      @id @default(autoincrement())
+  doctorId  String
+  date      DateTime // Date for which the availability is set
+  startTime DateTime // Start time of availability
+  endTime   DateTime // End time of availability
+  slots     Slot[] // Reference to generated slots
 
+  @@unique([doctorId, date]) // Ensure one availability record per doctor per day
+}
+
+model Slot {
+  id             Int            @id @default(autoincrement())
+  doctor         Doctor         @relation(fields: [doctorId], references: [id])
+  Availability   Availability[]
+  availabilityId Int // Reference to availability
+  startTime      DateTime // Start time of the slot
+  endTime        DateTime // End time of the slot
+  isBooked       Boolean        @default(false)
+  doctorId       String
+
+  @@unique([availabilityId, startTime]) // Ensure unique slots for each availability
   @@index([doctorId])
 }
 
@@ -59,32 +72,31 @@ model Appointment {
   id           String         @id @default(uuid())
   doctor       Doctor         @relation(fields: [doctorId], references: [id])
   patient      Patient        @relation(fields: [patientId], references: [id])
-  slot         Slot           @relation(fields: [slotId], references: [id])
   consultation Consultation[]
-  doctorId     String
   patientId    String
-  slotId       String
+  doctorId     String
+  slotId       Int
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  status       String
 
-  @@index([doctorId])
   @@index([patientId])
+  @@index([doctorId])
   @@index([slotId])
 }
 
 model Consultation {
-  id                   String      @id @default(uuid())
-  doctor               Doctor      @relation(fields: [doctorId], references: [id])
-  patient              Patient     @relation(fields: [patientId], references: [id])
-  appointment          Appointment @relation(fields: [appointmentId], references: [id])
-  doctorId             String
-  patientId            String
-  appointmentId        String
-  prescriptionUrl      String
-  prescriptionFilename String
-  audio                String
-  createdAt            DateTime    @default(now())
-  updatedAt            DateTime    @updatedAt
+  id                  String      @id @default(uuid())
+  doctor              Doctor      @relation(fields: [doctorId], references: [id])
+  patient             Patient     @relation(fields: [patientId], references: [id])
+  appointment         Appointment @relation(fields: [appointmentId], references: [id])
+  doctorId            String
+  patientId           String
+  appointmentId       String
+  prescriptionUrl     String
+  prescriptionContent String
+  createdAt           DateTime    @default(now())
+  updatedAt           DateTime    @updatedAt
 
   @@index([doctorId])
   @@index([patientId])

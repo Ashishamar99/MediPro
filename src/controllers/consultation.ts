@@ -100,7 +100,6 @@ export const addConsultationInfo = async (
       where: {
         id: payload.appointmentId,
         patientId: payload.patientId,
-        doctorId: payload.doctorId,
       },
     });
     if (!appointment) {

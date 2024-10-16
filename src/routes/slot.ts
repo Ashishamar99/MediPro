@@ -7,15 +7,15 @@ router.get("/", (req, res) => {
 });
 
 router.post("/availability", (req, res) => {
-  bookingController.generateSlots(req, res);
+  bookingController.upsertAvailabilityAndSlots(req, res);
 });
 
-router.get("/available", (req, res) => {
-  bookingController.getAvailableSlots(req, res);
-});
+// router.get("/available", (req, res) => {
+//   bookingController.getAvailableSlots(req, res);
+// });
 
-router.post("/book", (req, res) => {
-  bookingController.bookSlot(req, res);
-});
+// router.post("/book", (req, res) => {
+//   bookingController.bookSlot(req, res);
+// });
 
 export default router;
