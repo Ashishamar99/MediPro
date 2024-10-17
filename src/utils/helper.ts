@@ -24,3 +24,18 @@ export function generateSlots(
 
   return slots;
 }
+
+export const getFormattedSpeechData = (speechData: {
+  medicine: string[];
+  diagnosis: string;
+  advice: string;
+}): String => {
+  const medicine = speechData.medicine.join("\n");
+
+  let formattedSpeechData = `Diagnosing for, ${speechData.diagnosis}.`;
+  formattedSpeechData += ` Medicines prescribed, ${medicine}. `;
+  formattedSpeechData += speechData.advice.length
+    ? `Advice, ${speechData.advice}`
+    : "";
+  return formattedSpeechData;
+};

@@ -207,23 +207,23 @@ export const createAppointment = async (
 //   }
 // };
 
-// export const getAppointmentWithDID = async (
-//   req: Request<{ id: string }, any, any, ParsedQs, Record<string, any>>,
-//   res: Response<any, Record<string, any>, number>,
-// ): Promise<any> => {
-//   const id = req.params.id;
-//   try {
-//     const appointments = await prisma.appointment.findMany({
-//       where: {
-//         doctorId: id,
-//       },
-//       include: {
-//         patient: true,
-//       },
-//     });
-//     return res.status(200).json({ status: Status.SUCCESS, data: appointments });
-//   } catch (err) {
-//     console.error(err);
-//     return res.status(500).json({ status: Status.ERROR, message: err });
-//   }
-// };
+export const getDoctorAppointmentList = async (
+  req: Request<{ id: string }, any, any, ParsedQs, Record<string, any>>,
+  res: Response<any, Record<string, any>, number>,
+): Promise<any> => {
+  const id = req.params.id;
+  try {
+    const appointments = await prisma.appointment.findMany({
+      where: {
+        doctorId: id,
+      },
+      include: {
+        patient: true,
+      },
+    });
+    return res.status(200).json({ status: Status.SUCCESS, data: appointments });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ status: Status.ERROR, message: err });
+  }
+};

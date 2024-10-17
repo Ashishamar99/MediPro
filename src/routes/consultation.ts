@@ -17,8 +17,19 @@ router.get("/patient/:id", (req: any, res: any) => {
 router.get("/doctor/:id", (req: any, res: any) => {
   consultationController.getDoctorConsultation(req, res);
 });
-router.post("/", upload.single("prescription"), (req: any, res: any) => {
-  consultationController.addConsultationInfo(req, res);
+
+router.post("/", (req: any, res: any) => {
+  consultationController.createConsultationMetaData(req, res);
 });
 
+router.post(
+  "/prescription",
+  upload.single("prescription"),
+  (req: any, res: any) => {
+    consultationController.handlePrescriptionFileUpload(req, res);
+  },
+);
+router.put("/prescription-content", (req: any, res: any) => {
+  consultationController.updatePrescriptionContent(req, res);
+});
 export default router;

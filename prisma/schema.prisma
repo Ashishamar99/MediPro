@@ -93,11 +93,12 @@ model Consultation {
   doctorId            String
   patientId           String
   appointmentId       String
-  prescriptionUrl     String
-  prescriptionContent String
+  prescriptionUrl     String?
+  prescriptionContent String?
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 
+  @@unique([doctorId, appointmentId])
   @@index([doctorId])
   @@index([patientId])
   @@index([appointmentId])

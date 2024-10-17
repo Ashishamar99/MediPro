@@ -14,9 +14,9 @@ router.get("/", (req, res) => {
 //   appointmentController.getAppointmentWithPID(req, res);
 // });
 
-// router.get("/doctor/:id", (req, res) => {
-//   appointmentController.getAppointmentWithDID(req, res);
-// });
+router.get("/doctor/:id", (req, res) => {
+  appointmentController.getDoctorAppointmentList(req, res);
+});
 
 router.post("/book", (req, res) => {
   appointmentController.createAppointment(req, res);

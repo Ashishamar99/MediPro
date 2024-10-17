@@ -12,7 +12,6 @@ const port = process.env.PORT ?? 3500;
 
 app.use(cors({ origin: "*" }));
 app.use(bodyParser.json({ limit: "5mb" }));
-
 app.get("/health", (_req, res) => {
   res.json({ uptime: process.uptime(), message: "OK", timestamp: new Date() });
 });
