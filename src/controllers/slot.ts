@@ -129,7 +129,6 @@ export const upsertAvailabilityAndSlots = async (
         endTime: new Date(endTime),
       },
     });
-
     // Remove existing slots for this availability
     await tx.slot.deleteMany({
       where: {
@@ -146,7 +145,6 @@ export const upsertAvailabilityAndSlots = async (
       new Date(endTime),
       interval,
     );
-
     // Bulk create new slots
     await tx.slot.createMany({
       data: slots,

@@ -165,7 +165,6 @@ export const handlePrescriptionFileUpload = async (
   res: Response,
 ): Promise<any> => {
   const result = prescriptionSchema.safeParse(req);
-
   if (!result.success) {
     return res
       .status(400)
@@ -239,6 +238,51 @@ export const updatePrescriptionContent = async (
     return res.status(500).json({
       status: Status.INTERNAL_SERVER_ERROR,
       message: "Failed to upload prescription file",
+    });
+  }
+};
+
+export const completeConsultation = async (
+  req: Request,
+  res: Response,
+): Promise<any> => {
+  try {
+    const data = await prisma.$transaction(
+      async (trx) => {
+        const consultation = await prisma.consultation.findUnique({
+          where: { id: req.params.id },
+        });
+
+        if (!consultation) {
+          return res
+            .status(404)
+            .json({ success: false, message: "Consultation not found." });
+        }
+
+        const appointment = await prisma.appointment.update({
+          where: { id: consultation.appointmentId },
+          data: {
+            status: "completed",
+          },
+        });
+        await prisma.slot.delete({
+          where: { id: appointment.slotId },
+        });
+      },
+      {
+        timeout: 10000, // 10 seconds
+      },
+    );
+    res.json({
+      success: true,
+      message: "Consultation completed",
+      data,
+    });
+  } catch (err) {
+    logger.error({ message: (err as Error).message });
+    res.status(500).json({
+      status: Status.INTERNAL_SERVER_ERROR,
+      message: "Failed to update consultation details",
     });
   }
 };

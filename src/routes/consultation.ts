@@ -11,6 +11,11 @@ router.get("/", (req: any, res: any) => {
 router.get("/:id", (req: any, res: any) => {
   consultationController.getConsultationWithID(req, res);
 });
+
+router.put("/complete/:id", (req: any, res: any) => {
+  consultationController.completeConsultation(req, res);
+});
+
 router.get("/patient/:id", (req: any, res: any) => {
   consultationController.getPatientConsultation(req, res);
 });
