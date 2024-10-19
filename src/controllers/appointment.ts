@@ -54,7 +54,6 @@ export const createAppointment = async (
         },
       },
     });
-
     if (!slot || slot.isBooked) {
       return res.status(404).json({
         status: Status.FAILED,

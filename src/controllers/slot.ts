@@ -110,45 +110,72 @@ export const upsertAvailabilityAndSlots = async (
   const { doctorId, date, startTime, endTime, interval } = req.body;
   // TODO: validation for start time and end time
 
-  await prisma.$transaction(async (tx) => {
-    const availability = await tx.availability.upsert({
-      where: {
-        doctorId_date: {
-          doctorId: doctorId,
-          date: date,
-        },
-      },
-      update: {
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
-      },
-      create: {
-        doctorId: doctorId,
-        date: new Date(date),
-        startTime: new Date(startTime),
-        endTime: new Date(endTime),
-      },
-    });
-    // Remove existing slots for this availability
-    await tx.slot.deleteMany({
-      where: {
-        availabilityId: availability.id,
-        isBooked: false,
-      },
-    });
+  const doctor = await prisma.doctor.findUnique({ where: { id: doctorId } });
+  if (!doctor) {
+    return res
+      .status(400)
+      .json({ status: Status.BAD_REQUEST, message: "Doctor not found" });
+  }
 
-    // Generate new slots
-    const slots = generateSlots(
-      availability.id,
-      doctorId,
-      new Date(startTime),
-      new Date(endTime),
-      interval,
-    );
-    // Bulk create new slots
-    await tx.slot.createMany({
-      data: slots,
-    });
-    return res.status(201).json({ data: availability });
-  });
+  await prisma.$transaction(
+    async (tx) => {
+      const availability = await tx.availability.findFirst({
+        where: { doctorId },
+      });
+      if (!availability) {
+        const availability = await tx.availability.create({
+          data: {
+            doctorId,
+            date,
+            startTime,
+            endTime,
+          },
+        });
+
+        const slots = generateSlots(
+          availability.id,
+          doctorId,
+          new Date(startTime),
+          new Date(endTime),
+          interval,
+        );
+        // Bulk create new slots
+        await tx.slot.createMany({
+          data: slots,
+        });
+        return res.status(201).json({ data: availability });
+      }
+      const result = await tx.availability.update({
+        where: {
+          id: availability.id,
+        },
+        data: {
+          startTime: new Date(startTime),
+          endTime: new Date(endTime),
+        },
+      });
+      // Remove existing slots for this availability
+      await tx.slot.deleteMany({
+        where: {
+          availabilityId: availability.id,
+          isBooked: false,
+        },
+      });
+
+      // Generate new slots
+      const slots = generateSlots(
+        availability.id,
+        doctorId,
+        new Date(startTime),
+        new Date(endTime),
+        interval,
+      );
+      // Bulk create new slots
+      await tx.slot.createMany({
+        data: slots,
+      });
+      return res.status(201).json({ data: result });
+    },
+    { timeout: 10000 },
+  );
 };
