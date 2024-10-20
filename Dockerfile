@@ -11,9 +11,9 @@ COPY src/ src/
 RUN yarn build
 
 
-FROM node:${NODE_VERSION}-slim as runner
+FROM node:${NODE_VERSION}-slim AS runner
 WORKDIR /app
 
 COPY --from=builder build/package*.json .
 COPY --from=builder build/dist ./dist/
-CMD ["node", "dist/app.js"]
+CMD ["node", "/app/dist/src/app.js"]

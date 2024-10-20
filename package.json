@@ -25,7 +25,7 @@
   "scripts": {
     "test": "vitest",
     "dev": "nodemon src/app.ts",
-    "start": "yarn build && node dist/app.js",
+    "start": "yarn build && node dist/src/app.js",
     "build": "prisma generate && tsc -p .",
     "vercel-build": "prisma generate",
     "lint": "eslint . --ext .ts",
