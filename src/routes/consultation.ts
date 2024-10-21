@@ -1,24 +1,40 @@
-import express from 'express'
-import * as consultationController from '../controllers/consultation'
-import multer from 'multer';
-const router = express.Router()
-const upload = multer({ storage: multer.memoryStorage()});
+import express from "express";
+import * as consultationController from "../controllers/consultation";
+import multer from "multer";
+const router: any = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
-router.get('/', (req, res) => {
-  consultationController.getConsultationList(req, res)
-})
+router.get("/", (req: any, res: any) => {
+  consultationController.getConsultationList(req, res);
+});
 
-router.get('/:id', (req, res) => {
-  consultationController.getConsultationWithID(req, res)
-})
-router.get('/patient/:id', (req, res) => {
-  consultationController.getPatientConsultation(req, res)
-})
-router.get('/doctor/:id', (req, res) => {
-  consultationController.getDoctorConsultation(req, res)
-})
-router.post('/', upload.single("prescription"), (req, res) => {
-  consultationController.addConsultationInfo(req, res)
-})
+router.get("/:id", (req: any, res: any) => {
+  consultationController.getConsultationWithID(req, res);
+});
 
-export default router
+router.put("/complete/:id", (req: any, res: any) => {
+  consultationController.completeConsultation(req, res);
+});
+
+router.get("/patient/:id", (req: any, res: any) => {
+  consultationController.getPatientConsultation(req, res);
+});
+router.get("/doctor/:id", (req: any, res: any) => {
+  consultationController.getDoctorConsultation(req, res);
+});
+
+router.post("/", (req: any, res: any) => {
+  consultationController.createConsultationMetaData(req, res);
+});
+
+router.post(
+  "/prescription",
+  upload.single("prescription"),
+  (req: any, res: any) => {
+    consultationController.handlePrescriptionFileUpload(req, res);
+  },
+);
+router.put("/prescription-content", (req: any, res: any) => {
+  consultationController.updatePrescriptionContent(req, res);
+});
+export default router;

@@ -1,40 +1,39 @@
 # MediPro
 
 ### About the project
+
 Medipro is designed to help doctors and patients easily generate, store, and access prescriptions effectively.
 
+## Prerequisites
+- Supabase account
+  
 ## Setup
 
-- Create a Supabase storage bucket and MySQL database.
-- Create a `.env` file and add the below fields with your credentials:
-
-```
-SUPABASE_URL=
-SUPABASE_KEY=
-SUPABASE_BUCKET=
-DATABASE_URL=
-```
+Copy `.env.example` file to `.env` file and update the values
 
 ## Quickstart
 
-### Using Docker Compose 
-1. Clone the repository
-3. Modify the `.env` file with your Supabase and DB credentials.
-4. Run the following command to start the project:
+### Using Docker Compose
+
+1. Modify the `.env` file with your Supabase and DB credentials.
+2. Run the following command to start the project:
    ```
    docker-compose up
    ```
 
 ### Manual Setup
+
 1. Clone the repository: `https://github.com/Ashishamar99/MediPro`
 2. Navigate to the project directory: `cd medipro`
 3. Modify the `.env` file with your Supabase and DB credentials.
-4. Install dependencies using Yarn: 
-  ```
-  yarn install
-  ```
-5. Start the application: 
-  ```  
-  yarn start
-  ```
+4. Install dependencies using Yarn:
 
+```
+yarn install
+```
+
+5. Start the application:
+
+```
+yarn start
+```

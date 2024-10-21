@@ -1,16 +1,43 @@
-version: "3.8"
-
 services:
-  node_app:
+  server:
     image: voldemort69/medipro
-    container_name: medipro_app
+    container_name: medipro_server
     restart: always
     working_dir: /usr/src/app
     volumes:
       - .:/usr/src/app
+    ports:
+      - "${PORT}:${PORT}"
+    depends_on:
+      - db
+      - migrate
     env_file:
       - .env
-    ports:
-      - "5002:5002"
 
     command: yarn start
+
+  db:
+    image: postgres
+    restart: always
+    container_name: medipro_db
+    ports:
+      - 5432:5432
+    env_file:
+      - .env
+    volumes:
+      - postgres:/var/lib/postgresql/data
+
+  migrate:
+    image: voldemort69/medipro
+    container_name: medipro_migrate
+    working_dir: /usr/src/app
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+    command: npx prisma migrate deploy
+
+volumes:
+  postgres:
